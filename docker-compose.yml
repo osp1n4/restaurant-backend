@@ -32,7 +32,7 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3001
-      RABBITMQ_URL: ${RABBITMQ_URL} 
+      RABBITMQ_URL: amqp://rabbitmq:5672
       MONGODB_URL: mongodb://mongodb:27017/orders
     depends_on:
       - mongodb
@@ -45,7 +45,7 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3002
-      RABBITMQ_URL: ${RABBITMQ_URL} 
+      RABBITMQ_URL: amqp://rabbitmq:5672
       MONGODB_URL: mongodb://mongodb:27017/kitchen
     depends_on:
       - mongodb
@@ -58,7 +58,17 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3003
-      RABBITMQ_URL: ${RABBITMQ_URL}
+      RABBITMQ_URL: amqp://rabbitmq:5672
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
     restart: unless-stopped
 
 volumes:
