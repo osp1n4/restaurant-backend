@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { orderController } from '../controllers/orderController';
+import { getInternalAnalytics, postInternalAnalyticsExport } from '../controllers/analyticsController';
 
 const router = Router();
 
@@ -14,6 +15,10 @@ router.get('/:id/status', (req, res) => orderController.getOrderStatus(req, res)
 
 // GET /orders - Obtener todos los pedidos
 router.get('/', (req, res) => orderController.getAllOrders(req, res));
+
+// Internal analytics endpoints (not public)
+router.get('/internal/analytics', getInternalAnalytics);
+router.post('/internal/analytics/export', postInternalAnalyticsExport);
 
 export default router;
 

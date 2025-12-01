@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 
 // Rutas
-app.use('/orders', orderRoutes);
+app.use('/', orderRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
