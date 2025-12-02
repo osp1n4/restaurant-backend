@@ -8,3 +8,6 @@ coverage/
 *.swo
 *~
 
+# Firebase credentials
+serviceAccountKey.json
+
