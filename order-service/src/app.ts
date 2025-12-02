@@ -13,10 +13,7 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Rutas
-app.use('/', orderRoutes);
-
-// Health check
+// Health check (debe estar antes de las rutas para evitar conflictos)
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'ok', 
@@ -24,6 +21,9 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+// Rutas - Montadas en la raíz para mantener compatibilidad con rutas internas
+app.use('/', orderRoutes);
 
 // Inicializar servicios
 async function startServer() {
