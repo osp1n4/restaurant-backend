@@ -1,8 +1,16 @@
 import { Request, Response } from 'express';
+import { IServiceClient } from '../interfaces/IServiceClient';
 import { BaseHttpClient } from '../services/baseHttpClient';
 
-// TODO: move base URL to config
-const orderServiceClient = new BaseHttpClient(process.env.ORDER_SERVICE_URL || 'http://order-service:3002');
+/**
+ * Controller de analíticas del API Gateway refactorizado
+ * Cumple con Dependency Inversion Principle: Usa IServiceClient
+ */
+
+// Inyección de dependencias
+const orderServiceClient: IServiceClient = new BaseHttpClient(
+  process.env.ORDER_SERVICE_URL || 'http://order-service:3002'
+);
 
 function hasRole(req: Request) {
   // TODO: En producción, verificar roles reales desde JWT
