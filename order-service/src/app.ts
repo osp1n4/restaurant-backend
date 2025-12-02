@@ -3,6 +3,7 @@ import cors from 'cors';
 import { connectDatabase } from './config/database';
 import { rabbitMQClient } from './rabbitmq/rabbitmqClient';
 import orderRoutes from './routes/orderRoutes';
+import reviewRoutes from './routes/reviewRoutes';
 import { orderService } from './services/orderService';
 import { OrderStatus } from './models/Order';
 
@@ -15,11 +16,12 @@ app.use(express.json());
 
 // Rutas
 app.use('/orders', orderRoutes);
+app.use('/reviews', reviewRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
+  res.json({
+    status: 'ok',
     service: 'order-service',
     timestamp: new Date().toISOString()
   });
@@ -66,14 +68,14 @@ async function startServer() {
     await rabbitMQClient.consumeEvent('order.ready', async (message) => {
       try {
         const { orderId } = message;
-        
+
         if (!orderId) {
           console.warn('⚠️ Mensaje order.ready sin orderId:', message);
           return;
         }
 
         console.log(`🔄 Actualizando estado del pedido ${orderId} a READY`);
-        
+
         // Actualizar el estado del pedido a READY
         const updatedOrder = await orderService.updateOrderStatus(
           orderId,
@@ -100,6 +102,10 @@ async function startServer() {
       console.log(`   GET    /orders - Listar pedidos`);
       console.log(`   GET    /orders/:id - Obtener pedido`);
       console.log(`   GET    /orders/:id/status - Consultar estado`);
+      console.log(`   POST   /reviews - Crear reseña`);
+      console.log(`   GET    /reviews - Listar reseñas aprobadas`);
+      console.log(`   GET    /reviews/:id - Obtener reseña`);
+      console.log(`   PATCH  /reviews/:id/status - Cambiar estado (admin)`);
       console.log(`📥 Consumiendo eventos: order.preparing, order.ready`);
     });
   } catch (error) {
@@ -123,4 +129,3 @@ process.on('SIGINT', async () => {
 
 // Iniciar el servidor
 startServer();
-

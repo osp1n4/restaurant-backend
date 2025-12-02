@@ -12,6 +12,20 @@ services:
       timeout: 5s
       retries: 5
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   api-gateway:
     build: ./api-gateway
     ports:
@@ -32,10 +46,13 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3001
-      RABBITMQ_URL: ${RABBITMQ_URL} 
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
       MONGODB_URL: mongodb://mongodb:27017/orders
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     restart: unless-stopped
 
   kitchen-service:
@@ -45,10 +62,13 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3002
-      RABBITMQ_URL: ${RABBITMQ_URL} 
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
       MONGODB_URL: mongodb://mongodb:27017/kitchen
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     restart: unless-stopped
 
   notification-service:
@@ -58,7 +78,10 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3003
-      RABBITMQ_URL: ${RABBITMQ_URL}
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:
