@@ -96,20 +96,74 @@ export class AnalyticsService {
 
   streamCsv(query: CSVExportRequestDTO): Readable {
     const readable = new Readable({ read() {} });
-    // Write header
-    const columns = query.columns?.length ? query.columns : ['period','totalOrders','totalRevenue','productId','productName','quantity','avgPrepTime'];
-    const stringifier = stringify({ header: true, columns });
-    // Pipe stringifier into readable by forwarding data
-    stringifier.on('readable', () => {
-      let row;
-      while ((row = stringifier.read()) !== null) {
-        readable.push(row);
-      }
-    });
-    stringifier.on('end', () => readable.push(null));
-    // Minimal CSV content placeholder; real implementation should stream aggregate cursor rows.
-    stringifier.write({ period: `${query.from}-${query.to}`, totalOrders: 0, totalRevenue: 0, productId: '', productName: '', quantity: 0, avgPrepTime: '' });
-    stringifier.end();
+    
+    // Obtener datos reales de analíticas y escribirlos en el CSV
+    this.getAnalytics(query)
+      .then(analytics => {
+        // Definir columnas por defecto
+        const columns = query.columns?.length 
+          ? query.columns 
+          : ['period', 'totalOrders', 'totalRevenue', 'productId', 'productName', 'quantity', 'avgPrepTime'];
+        
+        // Preparar datos en formato de array de objetos
+        const records: any[] = [];
+        
+        if (!analytics || !analytics.series || !analytics.productsSold) {
+          // Si no hay datos, agregar una fila vacía
+          records.push({
+            period: `${query.from} to ${query.to}`,
+            totalOrders: 0,
+            totalRevenue: 0,
+            productId: '',
+            productName: 'No data available',
+            quantity: 0,
+            avgPrepTime: ''
+          });
+        } else {
+          // Combinar datos de series temporales con productos vendidos
+          analytics.series.forEach(seriesItem => {
+            analytics.productsSold.forEach(product => {
+              records.push({
+                period: seriesItem.period || '',
+                totalOrders: seriesItem.totalOrders || 0,
+                totalRevenue: seriesItem.totalRevenue || 0,
+                productId: product.productId || '',
+                productName: product.name || '',
+                quantity: product.quantity || 0,
+                avgPrepTime: seriesItem.avgPrepTime || ''
+              });
+            });
+          });
+        }
+        
+        // Generar CSV usando stringify con callback
+        // Usar punto y coma como delimitador para compatibilidad con Excel en español
+        stringify(records, {
+          header: true,
+          columns: columns,
+          delimiter: ';',  // Punto y coma para Excel en español
+          quote: '"',
+          quoted: true,
+          quoted_empty: true
+        }, (err, output) => {
+          if (err) {
+            console.error('Error generando CSV:', err);
+            readable.push('Error generating CSV report\n');
+            readable.push(null);
+            return;
+          }
+          // Agregar BOM UTF-8 para mejor compatibilidad con Excel
+          readable.push('\uFEFF' + output);
+          readable.push(null);
+        });
+      })
+      .catch(err => {
+        console.error('Error obteniendo analíticas:', err);
+        readable.push('period,totalOrders,totalRevenue,productId,productName,quantity,avgPrepTime\n');
+        readable.push('Error,0,0,,Error al generar reporte,0,\n');
+        readable.push(null);
+      });
+    
     return readable;
   }
 
