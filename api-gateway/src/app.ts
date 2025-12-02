@@ -3,6 +3,7 @@ import cors from 'cors';
 import axios from 'axios';
 import orderRoutes from './routes/orderRoutes';
 import kitchenRoutes from './routes/kitchenRoutes';
+import userRoutes from './routes/userRoutes';
 import { config, validateConfig } from './config';
 
 // Validar configuración al iniciar
@@ -27,6 +28,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use('/orders', orderRoutes);
 app.use('/kitchen', kitchenRoutes);
+app.use('/users', userRoutes);
 
 app.get('/health', async (req: Request, res: Response) => {
   const healthStatus = {
@@ -74,6 +76,7 @@ app.get('/', (req: Request, res: Response) => {
       orders: '/orders',
       kitchen: '/kitchen',
       health: '/health',
+      users: '/users',
     },
   });
 });
