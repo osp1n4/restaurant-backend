@@ -2,10 +2,14 @@
 services:
   mongodb:
     image: mongo:latest
+    container_name: restaurant-mongodb
     ports:
       - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: orders
     volumes:
       - mongodb_data:/data/db
+    command: mongod --bind_ip_all
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 10s
@@ -81,6 +85,19 @@ services:
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
     depends_on:
       rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: restaurant-mongo-express
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://restaurant-mongodb:27017
+      ME_CONFIG_BASICAUTH: false
+    depends_on:
+      mongodb:
         condition: service_healthy
     restart: unless-stopped
 
