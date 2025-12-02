@@ -2,6 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IKitchenOrder extends Document {
   orderId: string;
+  orderNumber?: string;  // ✅ NUEVO: Número de orden legible (ORD-xxx)
   userId: string;
   customerName?: string;
   customerEmail?: string;
@@ -21,15 +22,19 @@ export interface IKitchenOrder extends Document {
 }
 
 const KitchenOrderSchema = new Schema({
-  orderId: { 
-    type: String, 
-    required: true, 
+  orderId: {
+    type: String,
+    required: true,
     unique: true,
-    index: true 
+    index: true
   },
-  userId: { 
-    type: String, 
-    required: true 
+  orderNumber: {
+    type: String,
+    index: true
+  },
+  userId: {
+    type: String,
+    required: true
   },
   customerName: String,
   customerEmail: String,
@@ -38,22 +43,22 @@ const KitchenOrderSchema = new Schema({
     quantity: { type: Number, required: true },
     price: Number
   }],
-  status: { 
-    type: String, 
+  status: {
+    type: String,
     enum: ['RECEIVED', 'PREPARING', 'READY'],
     default: 'RECEIVED',
     index: true
   },
-  receivedAt: { 
-    type: Date, 
-    default: Date.now 
+  receivedAt: {
+    type: Date,
+    default: Date.now
   },
   preparingAt: Date,
   readyAt: Date,
   estimatedTime: Number,
   notes: String
-}, { 
-  timestamps: true 
+}, {
+  timestamps: true
 });
 
 export const KitchenOrder = mongoose.model<IKitchenOrder>('KitchenOrder', KitchenOrderSchema);

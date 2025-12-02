@@ -61,6 +61,31 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 /**
+ * GET /admin/reviews - Obtener todas las reseñas (admin)
+ * IMPORTANTE: Debe ir ANTES de /:id para que no lo capture
+ */
+router.get('/admin/reviews', async (req: Request, res: Response) => {
+  try {
+    const { page, limit } = req.query;
+    const queryParams = new URLSearchParams();
+
+    if (page) queryParams.append('page', page as string);
+    if (limit) queryParams.append('limit', limit as string);
+
+    const queryString = queryParams.toString() ? '?' + queryParams.toString() : '';
+    const response = await httpClient.get<any>(`/reviews/admin/reviews${queryString}`);
+    res.status(response.status || 200).json(response.data);
+  } catch (error: any) {
+    const status = error.response?.status || 500;
+    const message = error.response?.data?.message || 'Error fetching admin reviews';
+    res.status(status).json({
+      success: false,
+      message
+    });
+  }
+});
+
+/**
  * GET /reviews/:id - Obtener reseña específica
  */
 router.get('/:id', async (req: Request, res: Response) => {
@@ -92,30 +117,6 @@ router.patch('/:id/status', async (req: Request, res: Response) => {
   } catch (error: any) {
     const status = error.response?.status || 500;
     const message = error.response?.data?.message || 'Error updating review status';
-    res.status(status).json({
-      success: false,
-      message
-    });
-  }
-});
-
-/**
- * GET /admin/reviews - Obtener todas las reseñas (admin)
- */
-router.get('/admin/reviews', async (req: Request, res: Response) => {
-  try {
-    const { page, limit } = req.query;
-    const queryParams = new URLSearchParams();
-
-    if (page) queryParams.append('page', page as string);
-    if (limit) queryParams.append('limit', limit as string);
-
-    const queryString = queryParams.toString() ? '?' + queryParams.toString() : '';
-    const response = await httpClient.get<any>(`/reviews/admin/reviews${queryString}`);
-    res.status(response.status || 200).json(response.data);
-  } catch (error: any) {
-    const status = error.response?.status || 500;
-    const message = error.response?.data?.message || 'Error fetching admin reviews';
     res.status(status).json({
       success: false,
       message

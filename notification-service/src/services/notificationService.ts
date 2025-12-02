@@ -59,7 +59,11 @@ class NotificationService {
       message: messages[event.type],
       orderId: event.orderId,
       timestamp: new Date(),
-      eventType: event.type
+      eventType: event.type,
+      // ✅ Incluir orderNumber si existe en el evento
+      orderNumber: event.data?.orderNumber,
+      // ✅ Incluir todos los datos adicionales
+      data: event.data
     };
   }
 

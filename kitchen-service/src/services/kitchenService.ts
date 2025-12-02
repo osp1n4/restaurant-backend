@@ -3,6 +3,7 @@ import { RabbitMQClient } from '../rabbitmq/rabbitmqClient';
 
 export interface OrderCreatedEvent {
   orderId: string;
+  orderNumber?: string;  // ✅ NUEVO: Número de orden legible (ORD-xxx)
   userId?: string;
   customerName?: string;
   customerEmail?: string;
@@ -27,12 +28,12 @@ export class KitchenService {
    */
   async handleOrderCreated(orderData: OrderCreatedEvent): Promise<IKitchenOrder> {
     try {
-      console.log(`🍳 Processing new order: ${orderData.orderId}`);
+      console.log(`🍳 Processing new order: ${orderData.orderNumber || orderData.orderId}`);
 
       // Verificar si ya existe (idempotencia)
       const existingOrder = await KitchenOrder.findOne({ orderId: orderData.orderId });
       if (existingOrder) {
-        console.log(`⚠️ Order ${orderData.orderId} already exists, skipping...`);
+        console.log(`⚠️ Order ${orderData.orderNumber || orderData.orderId} already exists, skipping...`);
         return existingOrder;
       }
 
@@ -41,6 +42,7 @@ export class KitchenService {
 
       const kitchenOrder = new KitchenOrder({
         orderId: orderData.orderId,
+        orderNumber: orderData.orderNumber,  // ✅ Guardar orderNumber
         userId,
         customerName: orderData.customerName,
         customerEmail: orderData.customerEmail,
@@ -52,25 +54,27 @@ export class KitchenService {
       });
 
       await kitchenOrder.save();
-      console.log(`✅ Kitchen order saved: ${orderData.orderId}`);
+      console.log(`✅ Kitchen order saved: ${orderData.orderNumber || orderData.orderId}`);
 
       // Publicar evento order.received para notification-service
       await this.rabbitMQClient.publish('order.received', {
         type: 'order.received',
         orderId: orderData.orderId,
+        orderNumber: orderData.orderNumber,  // ✅ Incluir orderNumber
         userId,
         customerName: orderData.customerName,
         customerEmail: orderData.customerEmail,
         status: 'RECEIVED',
         timestamp: new Date().toISOString(),
         data: {
+          orderNumber: orderData.orderNumber,  // ✅ También en data
           receivedAt: kitchenOrder.receivedAt,
           estimatedTime: kitchenOrder.estimatedTime,
           items: orderData.items
         }
       });
 
-      console.log(`📤 Event published: order.received for ${orderData.orderId}`);
+      console.log(`📤 Event published: order.received for ${orderData.orderNumber || orderData.orderId}`);
 
       return kitchenOrder;
     } catch (error) {
@@ -85,7 +89,13 @@ export class KitchenService {
    */
   async startPreparing(orderId: string): Promise<IKitchenOrder> {
     try {
-      const order = await KitchenOrder.findOne({ orderId });
+      // Buscar por orderId o orderNumber
+      const order = await KitchenOrder.findOne({
+        $or: [
+          { orderId: orderId },
+          { orderNumber: orderId }
+        ]
+      });
 
       if (!order) {
         throw new Error(`Order ${orderId} not found`);
@@ -100,24 +110,26 @@ export class KitchenService {
       order.preparingAt = new Date();
       await order.save();
 
-      console.log(`👨‍🍳 Order ${orderId} is now PREPARING`);
+      console.log(`👨‍🍳 Order ${order.orderNumber || orderId} is now PREPARING`);
 
       // Publicar evento order.preparing para notification-service
       await this.rabbitMQClient.publish('order.preparing', {
         type: 'order.preparing',
         orderId: order.orderId,
+        orderNumber: order.orderNumber,  // ✅ Incluir orderNumber
         userId: order.userId,
         customerName: order.customerName,
         customerEmail: order.customerEmail,
         status: 'PREPARING',
         timestamp: new Date().toISOString(),
         data: {
+          orderNumber: order.orderNumber,  // ✅ También en data
           preparingAt: order.preparingAt,
           estimatedTime: order.estimatedTime
         }
       });
 
-      console.log(`📤 Event published: order.preparing for ${orderId}`);
+      console.log(`📤 Event published: order.preparing for ${order.orderNumber || orderId}`);
 
       return order;
     } catch (error) {
@@ -132,7 +144,13 @@ export class KitchenService {
    */
   async markAsReady(orderId: string): Promise<IKitchenOrder> {
     try {
-      const order = await KitchenOrder.findOne({ orderId });
+      // Buscar por orderId o orderNumber
+      const order = await KitchenOrder.findOne({
+        $or: [
+          { orderId: orderId },
+          { orderNumber: orderId }
+        ]
+      });
 
       if (!order) {
         throw new Error(`Order ${orderId} not found`);
@@ -147,18 +165,20 @@ export class KitchenService {
       order.readyAt = new Date();
       await order.save();
 
-      console.log(`✅ Order ${orderId} is now READY`);
+      console.log(`✅ Order ${order.orderNumber || orderId} is now READY`);
 
       // Publicar evento order.ready para notification-service
       await this.rabbitMQClient.publish('order.ready', {
         type: 'order.ready',
         orderId: order.orderId,
+        orderNumber: order.orderNumber,  // ✅ Incluir orderNumber
         userId: order.userId,
         customerName: order.customerName,
         customerEmail: order.customerEmail,
         status: 'READY',
         timestamp: new Date().toISOString(),
         data: {
+          orderNumber: order.orderNumber,  // ✅ También en data
           readyAt: order.readyAt,
           receivedAt: order.receivedAt,
           preparingAt: order.preparingAt,
@@ -166,7 +186,7 @@ export class KitchenService {
         }
       });
 
-      console.log(`📤 Event published: order.ready for ${orderId}`);
+      console.log(`📤 Event published: order.ready for ${order.orderNumber || orderId}`);
 
       return order;
     } catch (error) {
@@ -189,11 +209,17 @@ export class KitchenService {
   }
 
   /**
-   * Obtiene un pedido específico
+   * Obtiene un pedido específico por orderId o orderNumber
    */
   async getOrderById(orderId: string): Promise<IKitchenOrder | null> {
     try {
-      return await KitchenOrder.findOne({ orderId });
+      // Buscar por orderId o orderNumber
+      return await KitchenOrder.findOne({
+        $or: [
+          { orderId: orderId },
+          { orderNumber: orderId }
+        ]
+      });
     } catch (error) {
       console.error(`❌ Error fetching order:`, error);
       throw error;

@@ -22,6 +22,7 @@ export class OrderService {
       const order = new Order({
         orderNumber,
         customerName,
+        customerEmail: customerEmail || 'no-email@example.com',
         items,
         status: OrderStatus.PENDING
       });
@@ -68,12 +69,29 @@ export class OrderService {
 
   /**
    * Obtiene un pedido por su ID
-   * @param orderId - ID del pedido
+   * @param orderId - ID del pedido (puede ser _id de MongoDB o orderNumber/orderId)
    * @returns El pedido encontrado
    */
   async getOrderById(orderId: string): Promise<IOrder | null> {
     try {
-      const order = await Order.findById(orderId);
+      // Intentar buscar por _id primero (si es un ObjectId válido)
+      let order = null;
+
+      if (orderId.match(/^[0-9a-fA-F]{24}$/)) {
+        // Es un ObjectId válido de MongoDB
+        order = await Order.findById(orderId);
+      }
+
+      // Si no se encontró, buscar por orderId o orderNumber
+      if (!order) {
+        order = await Order.findOne({
+          $or: [
+            { orderId: orderId },
+            { orderNumber: orderId }
+          ]
+        });
+      }
+
       return order;
     } catch (error) {
       console.error('❌ Error obteniendo pedido:', error);
@@ -197,4 +215,3 @@ export class OrderService {
 
 // Instancia singleton del servicio
 export const orderService = new OrderService();
-
