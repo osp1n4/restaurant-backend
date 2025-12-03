@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { ReviewRepository } from '../../src/repositories/ReviewRepository';
-import Review from '../../src/models/Review';
-import { CreateReviewDTO, ReviewStatus } from '../../src/types/review';
+import { ReviewRepository, CreateReviewDTO } from '../../src/repositories/ReviewRepository';
+import { Review, IReview } from '../../src/models/Review';
+
+type ReviewStatus = 'pending' | 'approved' | 'hidden';
 
 describe('ReviewRepository - Unit Tests', () => {
   let mongoServer: MongoMemoryServer;
@@ -35,8 +36,11 @@ describe('ReviewRepository - Unit Tests', () => {
       const reviewData: CreateReviewDTO = {
         orderId: 'ORD-001',
         customerName: 'John Doe',
-        overallRating: 5,
-        foodRating: 5,
+        customerEmail: 'john@example.com',
+        ratings: {
+          overall: 5,
+          food: 5
+        },
         comment: 'Great food!'
       };
 
@@ -45,8 +49,8 @@ describe('ReviewRepository - Unit Tests', () => {
       expect(result._id).toBeDefined();
       expect(result.orderId).toBe('ORD-001');
       expect(result.customerName).toBe('John Doe');
-      expect(result.overallRating).toBe(5);
-      expect(result.foodRating).toBe(5);
+      expect(result.ratings.overall).toBe(5);
+      expect(result.ratings.food).toBe(5);
       expect(result.comment).toBe('Great food!');
       expect(result.status).toBe('pending');
       expect(result.createdAt).toBeInstanceOf(Date);
@@ -57,8 +61,11 @@ describe('ReviewRepository - Unit Tests', () => {
       const reviewData: CreateReviewDTO = {
         orderId: 'ORD-002',
         customerName: 'Jane Smith',
-        overallRating: 4,
-        foodRating: 5
+        customerEmail: 'jane@example.com',
+        ratings: {
+          overall: 4,
+          food: 5
+        }
       };
 
       const result = await repository.create(reviewData);
@@ -71,8 +78,11 @@ describe('ReviewRepository - Unit Tests', () => {
       const reviewData: CreateReviewDTO = {
         orderId: 'ORD-001',
         customerName: 'John Doe',
-        overallRating: 5,
-        foodRating: 5
+        customerEmail: 'john@example.com',
+        ratings: {
+          overall: 5,
+          food: 5
+        }
       };
 
       // Create first review
@@ -88,8 +98,11 @@ describe('ReviewRepository - Unit Tests', () => {
       const invalidData: any = {
         orderId: 'ORD-003',
         customerName: 'Test User',
-        overallRating: 6, // Invalid: > 5
-        foodRating: 5
+        customerEmail: 'test@example.com',
+        ratings: {
+          overall: 6, // Invalid: > 5
+          food: 5
+        }
       };
 
       await expect(repository.create(invalidData))
@@ -101,8 +114,11 @@ describe('ReviewRepository - Unit Tests', () => {
       const invalidData: any = {
         orderId: 'ORD-004',
         // Missing customerName
-        overallRating: 5,
-        foodRating: 5
+        customerEmail: 'test@example.com',
+        ratings: {
+          overall: 5,
+          food: 5
+        }
       };
 
       await expect(repository.create(invalidData))
@@ -116,8 +132,11 @@ describe('ReviewRepository - Unit Tests', () => {
       const created = await repository.create({
         orderId: 'ORD-001',
         customerName: 'John Doe',
-        overallRating: 5,
-        foodRating: 5
+        customerEmail: 'john@example.com',
+        ratings: {
+          overall: 5,
+          food: 5
+        }
       });
 
       const found = await repository.findById(created._id.toString());
@@ -133,6 +152,40 @@ describe('ReviewRepository - Unit Tests', () => {
 
       expect(found).toBeNull();
     });
+
+    test('should handle invalid ObjectId format gracefully', async () => {
+      const invalidId = 'not-a-valid-objectid';
+
+      await expect(async () => {
+        await repository.findById(invalidId);
+      }).rejects.toThrow();
+    });
+
+    test('should return review with all fields populated', async () => {
+      const reviewData = {
+        orderId: 'ORD-FULL',
+        customerName: 'Full Data User',
+        customerEmail: 'fulldata@example.com',
+        ratings: {
+          overall: 4,
+          food: 5
+        },
+        comment: 'Complete review with all fields'
+      };
+
+      const created = await repository.create(reviewData);
+      const found = await repository.findById(created._id.toString());
+
+      expect(found).toBeDefined();
+      expect(found!.orderId).toBe(reviewData.orderId);
+      expect(found!.customerName).toBe(reviewData.customerName);
+      expect(found!.ratings.overall).toBe(reviewData.ratings.overall);
+      expect(found!.ratings.food).toBe(reviewData.ratings.food);
+      expect(found!.comment).toBe(reviewData.comment);
+      expect(found!.status).toBe('pending');
+      expect(found!.createdAt).toBeInstanceOf(Date);
+      expect(found!.updatedAt).toBeInstanceOf(Date);
+    });
   });
 
   describe('findApproved', () => {
@@ -141,22 +194,31 @@ describe('ReviewRepository - Unit Tests', () => {
       const review1 = await repository.create({
         orderId: 'ORD-001',
         customerName: 'John',
-        overallRating: 5,
-        foodRating: 5
+        customerEmail: 'john@example.com',
+        ratings: {
+          overall: 5,
+          food: 5
+        }
       });
 
       const review2 = await repository.create({
         orderId: 'ORD-002',
         customerName: 'Jane',
-        overallRating: 4,
-        foodRating: 4
+        customerEmail: 'jane@example.com',
+        ratings: {
+          overall: 4,
+          food: 4
+        }
       });
 
       const review3 = await repository.create({
         orderId: 'ORD-003',
         customerName: 'Bob',
-        overallRating: 3,
-        foodRating: 3
+        customerEmail: 'bob@example.com',
+        ratings: {
+          overall: 3,
+          food: 3
+        }
       });
 
       // Approve first two reviews
@@ -187,8 +249,11 @@ describe('ReviewRepository - Unit Tests', () => {
         const review = await repository.create({
           orderId: `ORD-${i.toString().padStart(3, '0')}`,
           customerName: `Customer ${i}`,
-          overallRating: 5,
-          foodRating: 5
+          customerEmail: `customer${i}@example.com`,
+          ratings: {
+            overall: 5,
+            food: 5
+          }
         });
         await repository.updateStatus(review._id.toString(), 'approved');
       }
@@ -212,12 +277,65 @@ describe('ReviewRepository - Unit Tests', () => {
       await repository.create({
         orderId: 'ORD-100',
         customerName: 'Test',
-        overallRating: 5,
-        foodRating: 5
+        customerEmail: 'test@example.com',
+        ratings: {
+          overall: 5,
+          food: 5
+        }
       });
 
       const results = await repository.findApproved(1, 10);
       expect(results).toHaveLength(0);
+    });
+
+    test('should handle page beyond available data', async () => {
+      // Create only 3 approved reviews
+      for (let i = 1; i <= 3; i++) {
+        const review = await repository.create({
+          orderId: `ORD-${i}`,
+          customerName: `Customer ${i}`,
+          customerEmail: `customer${i}@example.com`,
+          ratings: {
+            overall: 5,
+            food: 5
+          }
+        });
+        await repository.updateStatus(review._id.toString(), 'approved');
+      }
+
+      const results = await repository.findApproved(5, 10); // Page 5 doesn't exist
+      expect(results).toHaveLength(0);
+    });
+
+    test('should exclude hidden reviews from results', async () => {
+      const review1 = await repository.create({
+        orderId: 'ORD-APPROVED',
+        customerName: 'Approved User',
+        customerEmail: 'approved@example.com',
+        ratings: {
+          overall: 5,
+          food: 5
+        }
+      });
+
+      const review2 = await repository.create({
+        orderId: 'ORD-HIDDEN',
+        customerName: 'Hidden User',
+        customerEmail: 'hidden@example.com',
+        ratings: {
+          overall: 4,
+          food: 4
+        }
+      });
+
+      await repository.updateStatus(review1._id.toString(), 'approved');
+      await repository.updateStatus(review2._id.toString(), 'hidden');
+
+      const results = await repository.findApproved(1, 10);
+
+      expect(results).toHaveLength(1);
+      expect(results[0].status).toBe('approved');
+      expect(results.find(r => r.status === 'hidden')).toBeUndefined();
     });
   });
 
@@ -227,22 +345,31 @@ describe('ReviewRepository - Unit Tests', () => {
       const review1 = await repository.create({
         orderId: 'ORD-001',
         customerName: 'John',
-        overallRating: 5,
-        foodRating: 5
+        customerEmail: 'john@example.com',
+        ratings: {
+          overall: 5,
+          food: 5
+        }
       });
 
       const review2 = await repository.create({
         orderId: 'ORD-002',
         customerName: 'Jane',
-        overallRating: 4,
-        foodRating: 4
+        customerEmail: 'jane@example.com',
+        ratings: {
+          overall: 4,
+          food: 4
+        }
       });
 
       const review3 = await repository.create({
         orderId: 'ORD-003',
         customerName: 'Bob',
-        overallRating: 3,
-        foodRating: 3
+        customerEmail: 'bob@example.com',
+        ratings: {
+          overall: 3,
+          food: 3
+        }
       });
 
       await repository.updateStatus(review1._id.toString(), 'approved');
@@ -277,8 +404,11 @@ describe('ReviewRepository - Unit Tests', () => {
         await repository.create({
           orderId: `ORD-${i.toString().padStart(3, '0')}`,
           customerName: `Customer ${i}`,
-          overallRating: 5,
-          foodRating: 5
+          customerEmail: `customer${i}@example.com`,
+          ratings: {
+            overall: 5,
+            food: 5
+          }
         });
       }
 
@@ -296,8 +426,11 @@ describe('ReviewRepository - Unit Tests', () => {
       const review = await repository.create({
         orderId: 'ORD-001',
         customerName: 'John',
-        overallRating: 5,
-        foodRating: 5
+        customerEmail: 'john@example.com',
+        ratings: {
+          overall: 5,
+          food: 5
+        }
       });
 
       const updated = await repository.updateStatus(
@@ -316,8 +449,11 @@ describe('ReviewRepository - Unit Tests', () => {
       const review = await repository.create({
         orderId: 'ORD-001',
         customerName: 'John',
-        overallRating: 5,
-        foodRating: 5
+        customerEmail: 'john@example.com',
+        ratings: {
+          overall: 5,
+          food: 5
+        }
       });
 
       const updated = await repository.updateStatus(
@@ -342,22 +478,31 @@ describe('ReviewRepository - Unit Tests', () => {
       const review1 = await repository.create({
         orderId: 'ORD-001',
         customerName: 'John',
-        overallRating: 5,
-        foodRating: 5
+        customerEmail: 'john@example.com',
+        ratings: {
+          overall: 5,
+          food: 5
+        }
       });
 
       const review2 = await repository.create({
         orderId: 'ORD-002',
         customerName: 'Jane',
-        overallRating: 4,
-        foodRating: 4
+        customerEmail: 'jane@example.com',
+        ratings: {
+          overall: 4,
+          food: 4
+        }
       });
 
       await repository.create({
         orderId: 'ORD-003',
         customerName: 'Bob',
-        overallRating: 3,
-        foodRating: 3
+        customerEmail: 'bob@example.com',
+        ratings: {
+          overall: 3,
+          food: 3
+        }
       });
 
       // Approve only first two
@@ -372,8 +517,11 @@ describe('ReviewRepository - Unit Tests', () => {
       await repository.create({
         orderId: 'ORD-001',
         customerName: 'John',
-        overallRating: 5,
-        foodRating: 5
+        customerEmail: 'john@example.com',
+        ratings: {
+          overall: 5,
+          food: 5
+        }
       });
 
       const count = await repository.countApproved();
@@ -386,22 +534,31 @@ describe('ReviewRepository - Unit Tests', () => {
       const review1 = await repository.create({
         orderId: 'ORD-001',
         customerName: 'John',
-        overallRating: 5,
-        foodRating: 5
+        customerEmail: 'john@example.com',
+        ratings: {
+          overall: 5,
+          food: 5
+        }
       });
 
       await repository.create({
         orderId: 'ORD-002',
         customerName: 'Jane',
-        overallRating: 4,
-        foodRating: 4
+        customerEmail: 'jane@example.com',
+        ratings: {
+          overall: 4,
+          food: 4
+        }
       });
 
       await repository.create({
         orderId: 'ORD-003',
         customerName: 'Bob',
-        overallRating: 3,
-        foodRating: 3
+        customerEmail: 'bob@example.com',
+        ratings: {
+          overall: 3,
+          food: 3
+        }
       });
 
       await repository.updateStatus(review1._id.toString(), 'approved');
@@ -416,8 +573,11 @@ describe('ReviewRepository - Unit Tests', () => {
       await repository.create({
         orderId: 'ORD-001',
         customerName: 'John',
-        overallRating: 5,
-        foodRating: 5
+        customerEmail: 'john@example.com',
+        ratings: {
+          overall: 5,
+          food: 5
+        }
       });
 
       const hasReview = await repository.hasReviewForOrder('ORD-001');
@@ -433,8 +593,11 @@ describe('ReviewRepository - Unit Tests', () => {
       const review = await repository.create({
         orderId: 'ORD-001',
         customerName: 'John',
-        overallRating: 5,
-        foodRating: 5
+        customerEmail: 'john@example.com',
+        ratings: {
+          overall: 5,
+          food: 5
+        }
       });
 
       await repository.updateStatus(review._id.toString(), 'hidden');
