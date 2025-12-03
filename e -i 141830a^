@@ -1,0 +1,58 @@
+[33mfaa4099[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/cancelar_pedido[m[33m)[m subiendo cambios
+[33m99e36f1[m add serviceAccountKey to gitignore
+[33m7118b7b[m remove serviceAccountKey.json from repo
+[33m141830a[m subi archivos serviceAccountKey.json
+[33mfc27630[m[33m ([m[1;31morigin/feature/cancelar_pedido[m[33m)[m Agrego nueva funcionalidad cancelar pedido
+[33m8838274[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/develop[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m feature(image): added image of the flow to the readme
+[33me3a7175[m Merge pull request #12 from J-Ciro/feature/test-fix-rabbitmq
+[33ma4076e8[m fix(notification-service):  add event preparing
+[33mc546a72[m Merge pull request #9 from J-Ciro/test/kitchen-service
+[33m0417df1[m chore(tests): increase Jest timeout and enhance MongoDB setup for improved reliability
+[33mb87853e[m Merge branch 'develop' of github-work:J-Ciro/restaurant-backend into test/kitchen-service
+[33mc51b878[m Merge pull request #11 from J-Ciro/fix/kitchen-ednpoints-apiGateway
+[33mf530838[m fix(rabbitmq): update queue name
+[33m55a8bea[m feat(kitchen): enhance kitchen order management with new endpoints and improved data handling
+[33mfb20003[m fix(order-service): fixed an issue where the service wasnt saving the 'preparing' state
+[33m0690a46[m Merge pull request #10 from J-Ciro/feature/test-fix-rabbitmq
+[33m82b6b7b[m fix(rabbitmq): fixed issues relataed to rabbitmq services not working correctly
+[33m6c06580[m fix(orders): fixed missmatching names on the model
+[33m3f3b18a[m Merge pull request #8 from edwingiraldoSS/feature/order
+[33mbf18a13[m Merge pull request #7 from J-Ciro/feature/notification-services
+[33m68d5c59[m test(KitchenService): remove obsolete kitchen test file
+[33me52c806[m test(setup): add test setup
+[33macda7a9[m test(KitchenService): add integration tests for Kitchen Service API endpoints
+[33m58f6fcb[m test(KitchenOrder, KitchenService): add unit tests for KitchenOrder model and KitchenService functionality
+[33m3a4ceef[m fix(KitchenOrder): add missing createdAt and updatedAt fields to interface
+[33m5dc1f1e[m fix(jest): update coverage configuration to exclude main app file
+[33mfb32ea6[m feature(packages): update package.json and package-lock.json with new dependencies
+[33m1112b05[m Feature:(OrderService) Restoring changed files
+[33mb31f764[m fix(test): update tests
+[33me4970f8[m Feature:(OrderService) Restoring changed files
+[33md28ae11[m Feature:(OrderService) test implementation
+[33madcf898[m merge
+[33m03da90b[m fix(env): fixed incorrect naming on the rabbitmq env
+[33m6e84d9a[m feature(notification-serices): add tests
+[33m414e909[m feature(notification-serices):create notification-service with types,services,rabbitmq and config
+[33m6df6921[m Merge branch 'develop' of https://github.com/J-Ciro/restaurant-backend into develop merged fixes from develop into feature/order-module
+[33m12842be[m Merge pull request #6 from edwingiraldoSS/feature/order
+[33m246b6c2[m Feature:(OrderStatus) Changes in rabbitmqClient
+[33m22bd015[m Merge branch 'develop' of https://github.com/J-Ciro/restaurant-backend into develop merged
+[33m1365976[m Merge pull request #5 from J-Ciro/feature/rabbitmq-env-config
+[33m4b865b8[m fix(rabbitmq): initialize URL in constructor and update connect method to use instance URL
+[33m4dfc71c[m fix(apigateway): added more more endpoits related to the kitchen-service
+[33m7e52618[m Merge pull request #4 from J-Ciro/feature/kitchen-service
+[33me07126b[m test(kitchen): add test publisher script to simulate order.created events
+[33m4680eba[m Merge pull request #2 from edwingiraldoSS/feature/order
+[33m5a2d446[m feature(kitchen-service): add database connection setup with mongoose
+[33m0d2e870[m feature(kitchen-service): server initialization with MongoDB and RabbitMQ setup, and add health check endpoint
+[33mdadbd72[m feature(kitchen-service): add KitchenController and routes for order management
+[33mec93320[m feature(kitchen-service): implement KitchenService with order handling and event publishing
+[33me630dcf[m feature(rabbitmq-client): implement RabbitMQ client with connection, publishing, and consuming capabilities
+[33mb1c6727[m feature(kitchen-service): define KitchenOrder model and add event interfaces for order processing
+[33m3915c4b[m Merge pull request #3 from J-Ciro/feature/docker-backend
+[33m86885b2[m feature(compose): added the correct docker compose config for the usage of CloudAMQP instead of locally hosted RabbitMQ
+[33mde83ffa[m Feat: Order Status Update
+[33mc398e1d[m Merge pull request #1 from J-Ciro/feature/api-gateway
+[33ma1a6229[m OrderStatus
+[33m74624f9[m feature(api-gateway): created the api-gateway with all the controllers, routes, types, configs, services, utils and validators and the test's for each controller
+[33m56d8277[m chore(codebase): crated the base structure of the project with the services, rabbitmq and endpoints
