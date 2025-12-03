@@ -1,134 +1,105 @@
-version: '3.8'
-
 services:
-  # MongoDB
   mongodb:
     image: mongo:latest
     container_name: restaurant-mongodb
     ports:
       - "27017:27017"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: orders
     volumes:
       - mongodb_data:/data/db
+    command: mongod --bind_ip_all
     healthcheck:
-      test: echo 'db.adminCommand("ping")' | mongosh -u root -p password
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
-    networks:
-      - restaurant-network
 
-  # RabbitMQ
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      ORDER_SERVICE_URL: http://order-service:3001
+      KITCHEN_SERVICE_URL: http://kitchen-service:3002
+    depends_on:
+      - order-service
+      - kitchen-service
+    restart: unless-stopped
+
+  order-service:
+    build: ./order-service
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      MONGODB_URL: mongodb://mongodb:27017/orders
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+  kitchen-service:
+    build: ./kitchen-service
+    ports:
+      - "3002:3002"
+    environment:
+      NODE_ENV: development
+      PORT: 3002
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      MONGODB_URL: mongodb://mongodb:27017/kitchen
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+  notification-service:
+    build: ./notification-service
+    ports:
+      - "3003:3003"
+    environment:
+      NODE_ENV: development
+      PORT: 3003
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: restaurant-mongo-express
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://restaurant-mongodb:27017
+      ME_CONFIG_BASICAUTH: false
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    restart: unless-stopped
+
   rabbitmq:
-    image: rabbitmq:3.12-management
-    container_name: restaurant-rabbitmq
+    image: rabbitmq:3-management
     ports:
       - "5672:5672"
       - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
-      test: rabbitmq-diagnostics -q ping
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
-    networks:
-      - restaurant-network
-
-  # Order Service
-  order-service:
-    build:
-      context: ./order-service
-      dockerfile: Dockerfile
-    container_name: restaurant-order-service
-    ports:
-      - "3001:3001"
-    environment:
-      NODE_ENV: development
-      PORT: 3001
-      MONGODB_URL: mongodb://root:password@mongodb:27017/orders?authSource=admin
-      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    networks:
-      - restaurant-network
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # Kitchen Service
-  kitchen-service:
-    build:
-      context: ./kitchen-service
-      dockerfile: Dockerfile
-    container_name: restaurant-kitchen-service
-    ports:
-      - "3002:3002"
-    environment:
-      NODE_ENV: development
-      PORT: 3002
-      MONGODB_URL: mongodb://root:password@mongodb:27017/kitchen?authSource=admin
-      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    networks:
-      - restaurant-network
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3002/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # API Gateway
-  api-gateway:
-    build:
-      context: ./api-gateway
-      dockerfile: Dockerfile
-    container_name: restaurant-api-gateway
-    ports:
-      - "3000:3000"
-    environment:
-      NODE_ENV: development
-      PORT: 3000
-      ORDER_SERVICE_URL: http://order-service:3001
-      KITCHEN_SERVICE_URL: http://kitchen-service:3002
-      CORS_ENABLED: "true"
-      CORS_ORIGIN: "*"
-    depends_on:
-      order-service:
-        condition: service_healthy
-      kitchen-service:
-        condition: service_healthy
-    networks:
-      - restaurant-network
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
 
 volumes:
   mongodb_data:
-  rabbitmq_data:
-
-networks:
-  restaurant-network:
-    driver: bridge

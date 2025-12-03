@@ -4,6 +4,8 @@ import mongoose from 'mongoose';
 import { connectDatabase } from './config/database';
 import { rabbitMQClient } from './rabbitmq/rabbitmqClient';
 import orderRoutes from './routes/orderRoutes';
+import { orderService } from './services/orderService';
+import { OrderStatus } from './models/Order';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -23,7 +25,7 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
-// Routes
+// Rutas
 app.use('/orders', orderRoutes);
 
 // 404 handler
@@ -55,29 +57,53 @@ async function startServer(): Promise<void> {
     await rabbitMQClient.connect();
     console.log('✅ RabbitMQ conectado');
 
-    // 3. Consumir eventos order.ready del Kitchen Service
+    // 3. Suscribirse al evento order.ready del Kitchen Service
     console.log('👂 Suscribiendo a eventos order.ready...');
-    await rabbitMQClient.consume(
-      'order-service-queue',
-      'order.ready',
-      async (orderData: any) => {
-        console.log('📥 Evento recibido: order.ready', orderData);
-        // Aquí iría la lógica para actualizar el estado del pedido
+    await rabbitMQClient.consumeEvent('order.ready', async (message) => {
+      try {
+        const { orderId } = message;
+
+        if (!orderId) {
+          console.warn('⚠️ Mensaje order.ready sin orderId:', message);
+          return;
+        }
+
+        console.log(`🔄 Actualizando estado del pedido ${orderId} a READY`);
+
+        // Actualizar el estado del pedido a READY
+        const updatedOrder = await orderService.updateOrderStatus(
+          orderId,
+          OrderStatus.READY
+        );
+
+        if (updatedOrder) {
+          console.log(`✅ Pedido ${updatedOrder.orderNumber} actualizado a estado READY`);
+        } else {
+          console.warn(`⚠️ No se encontró el pedido con ID: ${orderId}`);
+        }
+      } catch (error) {
+        console.error('❌ Error procesando evento order.ready:', error);
+        throw error; // Re-lanzar para que el mensaje se rechace
       }
-    );
+    });
     console.log('✅ Consumer listo para order.ready');
 
     // 4. Iniciar servidor HTTP
     app.listen(PORT, () => {
-      console.log(`✅ Order Service corriendo en puerto ${PORT}`);
-      console.log(`📡 Endpoints disponibles:`);
-      console.log(`   POST /orders`);
-      console.log(`   GET  /orders`);
-      console.log(`   GET  /orders/:id`);
-      console.log(`   GET  /orders/:id/status`);
-      console.log(`   POST /orders/:id/cancel`);
-      console.log(`   GET  /orders/:id/cancellation`);
-      console.log(`   GET  /health`);
+      console.log(`📋 Order Service corriendo en puerto ${PORT}`);
+      console.log(`🌐 Health check: http://localhost:${PORT}/health`);
+      console.log(`📦 Endpoints disponibles:`);
+      console.log(`   POST   /orders - Crear pedido`);
+      console.log(`   GET    /orders - Listar pedidos`);
+      console.log(`   GET    /orders/:id - Obtener pedido`);
+      console.log(`   GET    /orders/:id/status - Consultar estado`);
+      console.log(`   POST   /orders/:id/cancel - Cancelar pedido`);
+      console.log(`   GET    /orders/:id/cancellation - Ver cancelación`);
+      console.log(`   POST   /reviews - Crear reseña`);
+      console.log(`   GET    /reviews - Listar reseñas aprobadas`);
+      console.log(`   GET    /reviews/:id - Obtener reseña`);
+      console.log(`   PATCH  /reviews/:id/status - Cambiar estado (admin)`);
+      console.log(`📥 Consumiendo eventos: order.ready`);
     });
 
     // Manejo de cierre graceful

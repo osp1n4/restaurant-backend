@@ -38,39 +38,39 @@ const OrderItemSchema = new Schema({
 }, { _id: false });
 
 const OrderSchema = new Schema({
-  orderNumber: { 
-    type: String, 
-    required: true, 
-    unique: true,
-    index: true 
-  },
-  customerName: { 
-    type: String, 
+  orderNumber: {
+    type: String,
     required: true,
-    trim: true 
+    unique: true,
+    index: true
+  },
+  customerName: {
+    type: String,
+    required: true,
+    trim: true
   },
   customerEmail: {
     type: String,
     trim: true
   },
-  items: { 
-    type: [OrderItemSchema], 
+  items: {
+    type: [OrderItemSchema],
     required: true,
     validate: {
       validator: (items: OrderItem[]) => items.length > 0,
       message: 'El pedido debe tener al menos un item'
     }
   },
-  status: { 
-    type: String, 
+  status: {
+    type: String,
     enum: Object.values(OrderStatus),
     default: OrderStatus.PENDING,
-    required: true 
+    required: true
   },
-  total: { 
-    type: Number, 
-    required: true, 
-    min: 0 
+  total: {
+    type: Number,
+    required: true,
+    min: 0
   }
 }, {
   timestamps: true,
@@ -78,13 +78,12 @@ const OrderSchema = new Schema({
 });
 
 // Middleware para calcular el total antes de guardar
-OrderSchema.pre('save', function(this: IOrder, next: mongoose.CallbackWithoutResultAndOptionalError) {
+OrderSchema.pre('save', function(this: IOrder, next) {
   if (this.isModified('items')) {
-    this.total = this.items.reduce((sum: number, item: OrderItem) => sum + (item.price * item.quantity), 0);
+    this.total = this.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   }
   next();
 });
 
 // Modelo de Mongoose
 export const Order = mongoose.model<IOrder>('Order', OrderSchema);
-
