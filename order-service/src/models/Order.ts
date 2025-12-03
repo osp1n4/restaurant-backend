@@ -1,4 +1,3 @@
-
 import mongoose, { Schema, Document } from 'mongoose';
 
 // Enum para los estados del pedido
@@ -14,6 +13,7 @@ export enum OrderStatus {
 export interface IOrder extends Document {
   orderNumber: string;
   customerName: string;
+  customerEmail?: string;
   items: OrderItem[];
   status: OrderStatus;
   total: number;
@@ -49,6 +49,10 @@ const OrderSchema = new Schema({
     required: true,
     trim: true 
   },
+  customerEmail: {
+    type: String,
+    trim: true
+  },
   items: { 
     type: [OrderItemSchema], 
     required: true,
@@ -80,13 +84,6 @@ OrderSchema.pre('save', function(this: IOrder, next: mongoose.CallbackWithoutRes
   }
   next();
 });
-
-// Método para generar número de pedido único
-OrderSchema.statics.generateOrderNumber = async function(): Promise<string> {
-  const timestamp = Date.now();
-  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-  return `ORD-${timestamp}-${random}`;
-};
 
 // Modelo de Mongoose
 export const Order = mongoose.model<IOrder>('Order', OrderSchema);

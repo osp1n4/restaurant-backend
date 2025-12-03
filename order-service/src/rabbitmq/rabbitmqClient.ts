@@ -1,6 +1,9 @@
 import { connect, Connection, Channel } from 'amqplib';
 
 export class RabbitMQClient {
+  consume(arg0: string, arg1: string, arg2: (orderData: any) => Promise<void>) {
+    throw new Error('Method not implemented.');
+  }
   private connection: Awaited<ReturnType<typeof connect>> | null = null;
   private channel: Channel | null = null;
   private readonly url: string;

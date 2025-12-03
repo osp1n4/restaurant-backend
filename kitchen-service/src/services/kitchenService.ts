@@ -176,6 +176,38 @@ export class KitchenService {
   }
 
   /**
+   * Maneja el evento order.cancelled del order-service
+   * Cancela el pedido en cocina si existe
+   */
+  async handleOrderCancelled(orderData: any): Promise<IKitchenOrder | null> {
+    try {
+      const { orderId, previousStatus, reason, cancelledBy } = orderData;
+      
+      console.log(`🚫 Procesando cancelación de pedido: ${orderId}`);
+
+      const kitchenOrder = await KitchenOrder.findOne({ orderId });
+
+      if (!kitchenOrder) {
+        console.log(`⚠️ Pedido ${orderId} no encontrado en cocina (probablemente ya fue entregado)`);
+        return null;
+      }
+
+      // Cambiar status a CANCELLED
+      kitchenOrder.status = 'CANCELLED' as any; // Agregar a enum si es necesario
+      kitchenOrder.cancelledAt = new Date();
+      kitchenOrder.cancellationReason = reason;
+      await kitchenOrder.save();
+
+      console.log(`✅ Pedido cancelado en cocina: ${orderId}`);
+
+      return kitchenOrder;
+    } catch (error) {
+      console.error(`❌ Error manejando cancelación:`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Obtiene todos los pedidos en cocina
    */
   async getAllOrders(status?: string): Promise<IKitchenOrder[]> {

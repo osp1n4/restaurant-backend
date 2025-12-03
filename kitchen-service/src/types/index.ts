@@ -24,6 +24,26 @@ export interface OrderCreatedEvent {
   createdAt?: string;
 }
 
+/**
+ * Evento order.cancelled recibido del order-service
+ */
+export interface OrderCancelledEvent {
+  orderId: string;
+  userId?: string;
+  customerName?: string;
+  customerEmail?: string;
+  status: 'CANCELLED';
+  previousStatus: string;
+  reason?: string;
+  cancelledBy: 'customer' | 'admin';
+  cancelledAt: Date;
+  items: Array<{
+    name: string;
+    quantity: number;
+    price?: number;
+  }>;
+}
+
 // ========================================
 // EVENTOS DE SALIDA (Publicados)
 // ========================================

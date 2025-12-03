@@ -493,3 +493,106 @@ Y guarda variables:
 - `base_url_notification`: `http://localhost:3003`
 - `order_id`: (se actualiza después de crear un pedido)
 
+---
+
+## 🔴 CANCELAR PEDIDO (Cliente)
+```
+POST http://localhost:3000/orders/:id/cancel
+Content-Type: application/json
+
+Body:
+{
+  "reason": "Cambié de idea",
+  "cancelledBy": "customer"  // "customer" o "admin"
+}
+
+Ejemplo:
+POST http://localhost:3000/orders/507f1f77bcf86cd799439011/cancel
+
+Response exitosa (200):
+{
+  "success": true,
+  "message": "Pedido cancelado exitosamente",
+  "data": {
+    "order": {
+      "id": "507f1f77bcf86cd799439011",
+      "orderNumber": "ORD-1234567890-001",
+      "customerName": "Juan Pérez",
+      "status": "cancelled",
+      "items": [...],
+      "total": 34.48,
+      "cancelledAt": "2024-01-15T10:00:00.000Z"
+    }
+  }
+}
+
+Response error (400):
+{
+  "success": false,
+  "message": "No se puede cancelar un pedido en estado \"preparing\". Solo se pueden cancelar pedidos pendientes o recibidos en cocina."
+}
+
+Response error (404):
+{
+  "success": false,
+  "message": "Pedido 507f1f77bcf86cd799439011 no encontrado"
+}
+```
+
+**Validaciones:**
+- ✅ Solo se puede cancelar si está en estado: `pending` o `received`
+- ❌ No se puede cancelar si está en: `preparing`, `ready`, `delivered`
+- ✅ Registra historial de cancelación en MongoDB
+- ✅ Publica evento `order.cancelled` a RabbitMQ
+- ✅ Notification Service recibe evento y notifica al cliente
+
+## Historial de Cancelación de Pedido
+
+### Obtener Historial de Cancelación
+```
+GET http://localhost:3000/orders/:id/cancellation
+
+Ejemplo:
+GET http://localhost:3000/orders/507f1f77bcf86cd799439011/cancellation
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "cancellation": {
+      "orderId": "507f1f77bcf86cd799439011",
+      "orderNumber": "ORD-1234567890-001",
+      "reason": "Cambié de idea",
+      "previousStatus": "pending",
+      "cancelledAt": "2024-01-15T10:00:00.000Z",
+      "cancelledBy": "customer"
+    }
+  }
+}
+```
+
+---
+
+## 🔄 Flujo de Cancelación Completo
+
+```
+1. Cliente/Admin cancela pedido
+   POST /orders/:id/cancel
+                    ↓
+2. API Gateway enruta a Order Service
+                    ↓
+3. Order Service:
+   - Valida estado (pending o received)
+   - Guarda historial en OrderCancellation
+   - Actualiza estado a "cancelled"
+   - Publica "order.cancelled" a RabbitMQ
+                    ↓
+4. Kitchen Service (consume):
+   - Actualiza status a CANCELLED
+   - Marca pedido como cancelado
+                    ↓
+5. Notification Service (consume):
+   - Envía notificación al cliente por SSE
+   - Registra en logs
+```
+

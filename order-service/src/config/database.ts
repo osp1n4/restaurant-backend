@@ -9,9 +9,7 @@ export async function connectDatabase(): Promise<void> {
     
     console.log('🔄 Conectando a MongoDB...');
     
-    await mongoose.connect(mongoUrl, {
-      // Opciones de conexión recomendadas
-    });
+    await mongoose.connect(mongoUrl);
 
     console.log('✅ Conectado a MongoDB exitosamente');
     console.log(`📊 Base de datos: ${mongoose.connection.name}`);

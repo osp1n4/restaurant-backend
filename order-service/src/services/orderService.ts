@@ -1,4 +1,5 @@
 import { Order, IOrder, OrderStatus, OrderItem } from '../models/Order';
+import { OrderCancellation } from '../models/OrderCancellation';
 import { rabbitMQClient } from '../rabbitmq/rabbitmqClient';
 
 export class OrderService {
@@ -163,6 +164,96 @@ export class OrderService {
       return orders;
     } catch (error) {
       console.error('❌ Error obteniendo pedidos:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Cancela un pedido
+   * @param orderId - ID del pedido a cancelar
+   * @param reason - Razón de la cancelación (opcional)
+   * @param cancelledBy - Quién cancela: 'customer' o 'admin'
+   * @returns El pedido cancelado
+   */
+  async cancelOrder(
+    orderId: string,
+    reason?: string,
+    cancelledBy: 'customer' | 'admin' = 'customer'
+  ): Promise<IOrder> {
+    try {
+      const order = await Order.findById(orderId);
+
+      if (!order) {
+        throw new Error(`Pedido ${orderId} no encontrado`);
+      }
+
+      // Validar que solo se puede cancelar si está en estado PENDING o RECEIVED
+      const cancellableStatuses = [OrderStatus.PENDING, 'received']; // 'received' es desde Kitchen Service
+      
+      if (!cancellableStatuses.includes(order.status as any)) {
+        throw new Error(
+          `No se puede cancelar un pedido en estado "${order.status}". ` +
+          `Solo se pueden cancelar pedidos pendientes o recibidos en cocina.`
+        );
+      }
+
+      // Guardar historial de cancelación antes de actualizar
+      const cancellation = new OrderCancellation({
+        orderId: order._id.toString(),
+        orderNumber: order.orderNumber,
+        customerName: order.customerName,
+        customerEmail: order.customerName,
+        reason: reason || 'Sin especificar',
+        previousStatus: order.status,
+        cancelledBy,
+        cancelledAt: new Date()
+      });
+
+      await cancellation.save();
+      console.log(`📝 Cancelación registrada: ${order.orderNumber}`);
+
+      // Actualizar estado del pedido a CANCELLED
+      order.status = OrderStatus.CANCELLED;
+      order.updatedAt = new Date();
+      const cancelledOrder = await order.save();
+
+      // Publicar evento order.cancelled para notification-service
+      const eventData = {
+        type: 'order.cancelled',
+        orderId: cancelledOrder._id.toString(),
+        orderNumber: cancelledOrder.orderNumber,
+        customerName: cancelledOrder.customerName,
+        customerEmail: order.customerName,
+        previousStatus: cancellation.previousStatus,
+        reason: reason || 'Sin especificar',
+        cancelledBy,
+        timestamp: new Date().toISOString(),
+        data: {
+          cancelledAt: cancellation.cancelledAt,
+          items: cancelledOrder.items,
+          total: cancelledOrder.total
+        }
+      };
+
+      await rabbitMQClient.publishEvent('order.cancelled', eventData);
+      console.log(`📤 Evento publicado: order.cancelled para ${cancelledOrder.orderNumber}`);
+
+      return cancelledOrder;
+    } catch (error) {
+      console.error('❌ Error cancelando pedido:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtiene el historial de cancelaciones de un pedido
+   */
+  async getOrderCancellationHistory(orderId: string): Promise<any> {
+    try {
+      const cancellation = await OrderCancellation.findOne({ orderId });
+      return cancellation;
+    } catch (error) {
+      console.error('❌ Error obteniendo historial de cancelación:', error);
       throw error;
     }
   }

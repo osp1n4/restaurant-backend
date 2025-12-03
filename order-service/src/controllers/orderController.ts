@@ -172,6 +172,111 @@ export class OrderController {
       });
     }
   }
+
+  /**
+   * POST /orders/:id/cancel - Cancelar un pedido
+   */
+  async cancelOrder(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const { reason, cancelledBy } = req.body;
+
+      // Validaciones
+      if (!id) {
+        res.status(400).json({ 
+          error: 'El ID del pedido es requerido' 
+        });
+        return;
+      }
+
+      const cancelledByValue = cancelledBy || 'customer';
+      if (!['customer', 'admin'].includes(cancelledByValue)) {
+        res.status(400).json({ 
+          error: 'cancelledBy debe ser "customer" o "admin"' 
+        });
+        return;
+      }
+
+      // Cancelar el pedido
+      const order = await orderService.cancelOrder(
+        id,
+        reason,
+        cancelledByValue
+      );
+
+      res.status(200).json({
+        message: 'Pedido cancelado exitosamente',
+        order: {
+          id: order._id,
+          orderNumber: order.orderNumber,
+          customerName: order.customerName,
+          status: order.status,
+          previousStatus: order.status,
+          cancelledAt: order.updatedAt,
+          items: order.items,
+          total: order.total
+        }
+      });
+    } catch (error: any) {
+      console.error('❌ Error en cancelOrder:', error);
+
+      // Validar si es error por estado inválido
+      if (error.message.includes('No se puede cancelar')) {
+        res.status(400).json({ 
+          error: error.message
+        });
+        return;
+      }
+
+      // Validar si el pedido no existe
+      if (error.message.includes('no encontrado')) {
+        res.status(404).json({ 
+          error: error.message
+        });
+        return;
+      }
+
+      res.status(500).json({ 
+        error: 'Error al cancelar el pedido',
+        details: error.message 
+      });
+    }
+  }
+
+  /**
+   * GET /orders/:id/cancellation - Obtener historial de cancelación
+   */
+  async getOrderCancellation(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      const cancellation = await orderService.getOrderCancellationHistory(id);
+
+      if (!cancellation) {
+        res.status(404).json({ 
+          error: 'No hay registro de cancelación para este pedido' 
+        });
+        return;
+      }
+
+      res.json({
+        cancellation: {
+          orderId: cancellation.orderId,
+          orderNumber: cancellation.orderNumber,
+          reason: cancellation.reason,
+          previousStatus: cancellation.previousStatus,
+          cancelledAt: cancellation.cancelledAt,
+          cancelledBy: cancellation.cancelledBy
+        }
+      });
+    } catch (error: any) {
+      console.error('❌ Error en getOrderCancellation:', error);
+      res.status(500).json({ 
+        error: 'Error al obtener historial de cancelación',
+        details: error.message 
+      });
+    }
+  }
 }
 
 export const orderController = new OrderController();

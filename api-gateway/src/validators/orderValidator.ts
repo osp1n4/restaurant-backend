@@ -1,42 +1,9 @@
 import { Request } from 'express';
 import { Validators } from '../utils/validators';
-import { CreateOrderRequest } from '../types';
 
-/**
- * Validador para pedidos
- */
 export class OrderValidator {
-  /**
-   * Valida los datos para crear un nuevo pedido
-   */
   static validateCreateOrder(req: Request): { valid: boolean; message?: string } {
-    if (Validators.isEmpty(req.body)) {
-      return { valid: false, message: 'El cuerpo de la petición está vacío' };
-    }
-
-    const { items, customerName, customerEmail } = req.body as CreateOrderRequest; // ← Cambiado a items
-
-    // Validar items (items del pedido)
-    const itemsValidation = Validators.validateArray(items, 'items', 1); // ← Cambiado a items
-    if (!itemsValidation.valid) {
-      return itemsValidation;
-    }
-
-    // Validar que cada item tenga los campos requeridos
-    if (Array.isArray(items)) { // ← Cambiado a items
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-        if (!item.name || typeof item.name !== 'string') { // ← Cambiado a name
-          return { valid: false, message: `items[${i}].name es requerido y debe ser una cadena de texto` };
-        }
-        if (!item.quantity || typeof item.quantity !== 'number' || item.quantity <= 0) {
-          return { valid: false, message: `items[${i}].quantity es requerido y debe ser un número mayor a 0` };
-        }
-        if (!item.price || typeof item.price !== 'number' || item.price <= 0) { // ← Cambiado a price
-          return { valid: false, message: `items[${i}].price es requerido y debe ser un número mayor a 0` };
-        }
-      }
-    }
+    const { items, customerName, customerEmail } = req.body;
 
     // Validar customerName
     const nameValidation = Validators.validateRequired(customerName, 'customerName');
@@ -44,23 +11,47 @@ export class OrderValidator {
       return nameValidation;
     }
 
-    // Validar customerEmail
-    const emailValidation = Validators.validateEmail(customerEmail);
-    if (!emailValidation.valid) {
-      return emailValidation;
+    // Validar items
+    const itemsValidation = Validators.validateArray(items, 'items', 1);
+    if (!itemsValidation.valid) {
+      return itemsValidation;
+    }
+
+    // Validar estructura de cada item
+    for (const item of items) {
+      if (!item.name || !item.quantity || item.price === undefined) {
+        return {
+          valid: false,
+          message: 'Cada item debe tener name, quantity y price'
+        };
+      }
+      if (item.quantity < 1) {
+        return {
+          valid: false,
+          message: 'La cantidad debe ser mayor a 0'
+        };
+      }
+      if (item.price < 0) {
+        return {
+          valid: false,
+          message: 'El precio no puede ser negativo'
+        };
+      }
+    }
+
+    // Validar email si se proporciona
+    if (customerEmail) {
+      const emailValidation = Validators.validateEmail(customerEmail);
+      if (!emailValidation.valid) {
+        return emailValidation;
+      }
     }
 
     return { valid: true };
   }
 
-  /**
-   * Valida que el ID del pedido esté presente
-   */
   static validateOrderId(req: Request): { valid: boolean; message?: string } {
     const { id } = req.params;
-    if (Validators.isEmpty(id)) {
-      return { valid: false, message: 'Se requiere el ID del pedido' };
-    }
-    return { valid: true };
+    return Validators.validateRequired(id, 'Order ID');
   }
 }
