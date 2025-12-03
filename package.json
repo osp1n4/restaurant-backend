@@ -36,7 +36,6 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "mongoose": "^9.0.0",
-  "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/jest": "^30.0.0"
   }
