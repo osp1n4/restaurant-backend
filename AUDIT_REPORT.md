@@ -445,7 +445,7 @@ No hay JWT, OAuth, o ningún mecanismo de autenticación.
    - Validación de pedido entregado
 
 2. **Listar reseñas públicas** (GET /reviews)
-   - Solo reseñas aprobadas
+   
    - Paginación (10 por página)
    - Ordenadas por fecha descendente
 
