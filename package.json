@@ -1,43 +1,40 @@
 {
   "name": "restaurant-backend",
   "version": "1.0.0",
-  "description": "Sistema de procesamiento de pedidos para restaurante con arquitectura de microservicios.",
-  "main": "index.js",
+  "description": "Sistema de procesamiento de pedidos para restaurante con arquitectura de microservicios",
+  "private": true,
   "scripts": {
-    "install:all": "cd order-service && npm install && cd ../kitchen-service && npm install && cd ../notification-service && npm install && cd ../api-gateway && npm install",
-    "services:start": "powershell -ExecutionPolicy Bypass -File ./start-services.ps1",
-    "services:stop": "powershell -ExecutionPolicy Bypass -File ./stop-services.ps1",
-    "dev:order": "cd order-service && npm run dev",
-    "dev:kitchen": "cd kitchen-service && npm run dev",
-    "dev:notification": "cd notification-service && npm run dev",
-    "dev:gateway": "cd api-gateway && npm run dev",
-    "docker:up": "docker-compose up",
-    "docker:up:build": "docker-compose up --build",
-    "docker:up:detached": "docker-compose up -d",
+    "install:all": "npm install --prefix order-service && npm install --prefix kitchen-service && npm install --prefix api-gateway && npm install --prefix notification-service",
+    "dev:order": "npm run dev --prefix order-service",
+    "dev:kitchen": "npm run dev --prefix kitchen-service",
+    "dev:gateway": "npm run dev --prefix api-gateway",
+    "dev:notification": "npm run dev --prefix notification-service",
+    "build:all": "npm run build --prefix order-service && npm run build --prefix kitchen-service && npm run build --prefix api-gateway && npm run build --prefix notification-service",
+    "start:all": "npm start --prefix order-service & npm start --prefix kitchen-service & npm start --prefix api-gateway & npm start --prefix notification-service",
+    "test:all": "npm test --prefix order-service && npm test --prefix kitchen-service && npm test --prefix api-gateway",
+    "docker:up": "docker-compose up --build",
     "docker:down": "docker-compose down",
-    "docker:logs": "docker-compose logs -f",
-    "test": "cd order-service && npm test",
-    "test:order": "cd order-service && npm test",
-    "test:watch": "cd order-service && npm run test:watch",
-    "test:all": "npm run test:order"
+    "docker:clean": "docker-compose down -v && docker system prune -a --volumes"
   },
-  "keywords": [],
+  "keywords": [
+    "restaurant",
+    "orders",
+    "microservices",
+    "rabbitmq",
+    "mongodb"
+  ],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "@types/express": "^5.0.5",
-    "@types/mongoose": "^5.11.96",
-    "axios": "^1.13.2",
-    "express": "^5.1.0",
-    "firebase-admin": "^13.6.0"
-  },
-  "devDependencies": {
-    "typescript": "^5.9.3",
-    "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "mongoose": "^9.0.0",
   "devDependencies": {
     "@types/cors": "^2.8.19",
-    "@types/jest": "^30.0.0"
+    "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
+    "@types/mongoose": "^5.11.96",
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "mongoose": "^9.0.0"
   }
 }
