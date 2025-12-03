@@ -23,7 +23,7 @@ class MockReviewRepository implements IReviewRepository {
   }
 
   async findById(id: string): Promise<IReview | null> {
-    return this.reviews.find(r => (r._id as any).toString() === id || r._id === id) || null;
+    return this.reviews.find(r => (r._id as any).toString() === id) || null;
   }
 
   async findApproved(page: number, limit: number): Promise<IReview[]> {
@@ -38,7 +38,7 @@ class MockReviewRepository implements IReviewRepository {
   }
 
   async updateStatus(id: string, status: ReviewStatus): Promise<IReview | null> {
-    const review = this.reviews.find(r => (r._id as any).toString() === id || r._id === id);
+    const review = this.reviews.find(r => (r._id as any).toString() === id);
     if (review) {
       review.status = status;
       review.updatedAt = new Date();
@@ -593,7 +593,7 @@ describe('ReviewService - Unit Tests', () => {
             food: 5
           }
         });
-        await mockRepository.updateStatus(review._id, 'approved');
+        await mockRepository.updateStatus((review._id as any).toString(), 'approved');
       }
 
       // Test page 0 (should default to 1)

@@ -1,0 +1,333 @@
+<html><head><meta charset="utf-8"/><title>Test Report - Review Module</title><style type="text/css">:root {
+  --text-primary: #eee;
+  --text-secondary: #aaa;
+  --success: #2ecc71;
+  --success-bright: #1e3d2a;
+  --danger: #e74c3c;
+  --danger-bright: #3d1e1e;
+  --warning: #f39c12;
+  --warning-bright: #3d2c1e;
+  --panel: #1f1f1f;
+  --border: #444;
+  --disabled: #666;
+  background-color: #121212;
+}
+
+html,
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  margin: 0;
+  padding: 0;
+  color: var(--text-primary);
+}
+body {
+  padding: 2rem 1rem;
+}
+.jesthtml-content {
+  margin: 0 auto;
+  max-width: 70rem;
+}
+header {
+  display: flex;
+  align-items: center;
+}
+#title {
+  margin: 0;
+  flex-grow: 1;
+}
+#logo {
+  height: 4rem;
+}
+#timestamp {
+  color: var(--text-secondary);
+  margin-top: 0.5rem;
+}
+
+#metadata-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.additional-information-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+}
+
+/** SUMMARY */
+#summary {
+  color: var(--text-primary);
+  display: flex;
+  font-family: monospace;
+  font-size: 1rem;
+}
+#summary > div {
+  margin-right: 0.5rem;
+  background: var(--panel);
+  padding: 1rem;
+  min-width: 15rem;
+}
+#summary > div:last-child {
+  margin-right: 0;
+}
+@media only screen and (max-width: 720px) {
+  #summary {
+    flex-direction: column;
+  }
+  #summary > div {
+    margin-right: 0;
+    margin-top: 1rem;
+  }
+  #summary > div:first-child {
+    margin-top: 0;
+  }
+}
+
+.summary-total {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+.summary-passed {
+  color: var(--success);
+  border-left: 0.4rem solid var(--success);
+  padding-left: 0.5rem;
+  margin-bottom: 0.15rem;
+}
+.summary-failed,
+.summary-obsolete-snapshots {
+  color: var(--danger);
+  border-left: 0.4rem solid var(--danger);
+  padding-left: 0.5rem;
+  margin-bottom: 0.15rem;
+}
+.summary-pending {
+  color: var(--warning);
+  border-left: 0.4rem solid var(--warning);
+  padding-left: 0.5rem;
+  margin-bottom: 0.15rem;
+}
+.summary-empty {
+  color: var(--disabled);
+  border-left: 0.4rem solid var(--disabled);
+  margin-bottom: 0.15rem;
+}
+
+.test-result {
+  padding: 1rem;
+  margin-bottom: 0.25rem;
+}
+.test-result:last-child {
+  border: 0;
+}
+.test-result.passed {
+  background-color: var(--success-bright);
+  color: var(--success);
+}
+.test-result.failed {
+  background-color: var(--danger-bright);
+  color: var(--danger);
+}
+.test-result.pending {
+  background-color: var(--warning-bright);
+  color: var(--warning);
+}
+
+.test-info {
+  display: flex;
+  justify-content: space-between;
+}
+.test-suitename {
+  width: 20%;
+  text-align: left;
+  font-weight: bold;
+  word-break: break-word;
+}
+.test-title {
+  width: 40%;
+  text-align: left;
+  font-style: italic;
+}
+.test-status {
+  width: 20%;
+  text-align: right;
+}
+.test-duration {
+  width: 10%;
+  text-align: right;
+  font-size: 0.85rem;
+}
+
+.failureMessages {
+  padding: 0 1rem;
+  margin-top: 1rem;
+  border-top: 1px dashed var(--danger);
+}
+.failureMessages.suiteFailure {
+  border-top: none;
+}
+.failureMsg {
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+}
+
+.suite-container {
+  margin-bottom: 1rem;
+}
+.suite-info {
+  padding: 1rem;
+  background-color: var(--panel);
+  color: var(--text-secondary);
+  border: 0.15rem solid;
+  border-color: var(--panel);
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+.suite-info:hover {
+  border-color: var(--border);
+  cursor: pointer;
+}
+.suite-info .suite-path {
+  word-break: break-all;
+  flex-grow: 1;
+  font-family: monospace;
+  font-size: 1rem;
+}
+.suite-info .suite-time {
+  margin-left: 1rem;
+  padding: 0.2rem 0.3rem;
+  font-size: 0.85rem;
+}
+.suite-info .suite-time.warn {
+  background-color: var(--danger);
+  color: #fff;
+}
+.suite-info:before {
+  content: "\2303";
+  display: inline-block;
+  margin-right: 1rem;
+  transform: rotate(180deg) translateY(0.15rem);
+}
+.suite-container[open] .suite-info:before {
+  transform: rotate(0deg) translateY(0.15rem);
+}
+
+/* CONSOLE LOGS */
+.suite-consolelog {
+  margin-bottom: 0.25rem;
+  padding: 1rem;
+  background-color: var(--panel);
+}
+.suite-consolelog-header {
+  font-weight: bold;
+}
+.suite-consolelog-item {
+  padding: 0.5rem;
+}
+.suite-consolelog-item pre {
+  margin: 0.5rem 0;
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+}
+.suite-consolelog-item-origin {
+  color: var(--text-secondary);
+  font-weight: bold;
+}
+.suite-consolelog-item-message {
+  color: var(--text-primary);
+  font-size: 1rem;
+  padding: 0 0.5rem;
+}
+
+/* OBSOLETE SNAPSHOTS */
+.suite-obsolete-snapshots {
+  margin-bottom: 0.25rem;
+  padding: 1rem;
+  background-color: var(--danger-bright);
+  color: var(--danger);
+}
+.suite-obsolete-snapshots-header {
+  font-weight: bold;
+}
+.suite-obsolete-snapshots-item {
+  padding: 0.5rem;
+}
+.suite-obsolete-snapshots-item pre {
+  margin: 0.5rem 0;
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+}
+.suite-obsolete-snapshots-item-message {
+  color: var(--text-primary);
+  font-size: 1rem;
+  padding: 0 0.5rem;
+}
+</style></head><body><main class="jesthtml-content"><header><h1 id="title">Test Report - Review Module</h1></header><section id="metadata-container"><div id="timestamp">Started: 2025-12-02 20:45:13</div><div id="summary"><div id="suite-summary"><div class="summary-total">Suites (1)</div><div class="summary-passed  summary-empty">0 passed</div><div class="summary-failed ">1 failed</div><div class="summary-pending  summary-empty">0 pending</div></div><div id="test-summary"><div class="summary-total">Tests (16)</div><div class="summary-passed ">12 passed</div><div class="summary-failed ">4 failed</div><div class="summary-pending  summary-empty">0 pending</div></div></div></section><details id="suite-1" class="suite-container" open=""><summary class="suite-info"><div class="suite-path">C:\Users\gerardo.leyton\Documents\sofka\trainning\taller2_Scramble  Refactor - El Reto\restaurante_grupo2\restaurant-backend\order-service\tests\integration\rabbitmq.integration.test.ts</div><div class="suite-time warn">26.864s</div></summary><div class="suite-tests"><div class="test-result failed"><div class="test-info"><div class="test-suitename">RabbitMQ Integration Tests - Producer -&gt; Broker -&gt; Consumer &gt; Producer -&gt; Consumer: Review Created Event</div><div class="test-title">should publish and consume review.created event</div><div class="test-status">failed</div><div class="test-duration">0.715s</div></div><div class="failureMessages"> <pre class="failureMsg">Error: expect(received).toMatchObject(expected)
+
+- Expected  - 8
++ Received  + 4
+
+  Object {
+-   "comment": "Excellent service!",
+-   "customerEmail": "john@example.com",
+-   "customerName": "John Doe",
+-   "orderId": "ORD-001",
++   "orderId": "ORD-002",
+    "ratings": Object {
+-     "food": 5,
+-     "overall": 5,
++     "food": 4,
++     "overall": 4,
+    },
+-   "reviewId": "test-review-123",
+-   "status": "pending",
++   "reviewId": "multi-consumer-test",
+  }
+    at Object.&lt;anonymous&gt; (C:\Users\gerardo.leyton\Documents\sofka\trainning\taller2_Scramble  Refactor - El Reto\restaurante_grupo2\restaurant-backend\order-service\tests\integration\rabbitmq.integration.test.ts:187:31)</pre></div></div><div class="test-result failed"><div class="test-info"><div class="test-suitename">RabbitMQ Integration Tests - Producer -&gt; Broker -&gt; Consumer &gt; Producer -&gt; Consumer: Review Created Event</div><div class="test-title">should handle multiple consumers for the same event</div><div class="test-status">failed</div><div class="test-duration">0.748s</div></div><div class="failureMessages"> <pre class="failureMsg">Error: expect(received).toMatchObject(expected)
+
+- Expected  - 6
++ Received  + 3
+
+  Object {
+-   "orderId": "ORD-002",
+-   "ratings": Object {
+-     "food": 4,
+-     "overall": 4,
+-   },
+-   "reviewId": "multi-consumer-test",
++   "data": "review data",
++   "timestamp": "2025-12-03T01:44:23.505Z",
++   "type": "review",
+  }
+    at Object.&lt;anonymous&gt; (C:\Users\gerardo.leyton\Documents\sofka\trainning\taller2_Scramble  Refactor - El Reto\restaurante_grupo2\restaurant-backend\order-service\tests\integration\rabbitmq.integration.test.ts:227:20)</pre></div></div><div class="test-result failed"><div class="test-info"><div class="test-suitename">RabbitMQ Integration Tests - Producer -&gt; Broker -&gt; Consumer &gt; Producer -&gt; Consumer: Review Status Changed Event</div><div class="test-title">should publish and consume review.status.changed event</div><div class="test-status">failed</div><div class="test-duration">0.675s</div></div><div class="failureMessages"> <pre class="failureMsg">Error: expect(received).toMatchObject(expected)
+
+- Expected  - 3
++ Received  + 2
+
+  Object {
+-   "changedAt": "2025-12-03T01:45:26.669Z",
+    "newStatus": "approved",
+-   "orderId": "ORD-003",
++   "orderId": "ORD-WORKFLOW",
+    "previousStatus": "pending",
+-   "reviewId": "review-456",
++   "reviewId": "workflow-test-123",
+  }
+    at Object.&lt;anonymous&gt; (C:\Users\gerardo.leyton\Documents\sofka\trainning\taller2_Scramble  Refactor - El Reto\restaurante_grupo2\restaurant-backend\order-service\tests\integration\rabbitmq.integration.test.ts:257:31)</pre></div></div><div class="test-result failed"><div class="test-info"><div class="test-suitename">RabbitMQ Integration Tests - Producer -&gt; Broker -&gt; Consumer &gt; Message Routing and Routing Keys</div><div class="test-title">should not route message to wrong consumer</div><div class="test-status">failed</div><div class="test-duration">1.132s</div></div><div class="failureMessages"> <pre class="failureMsg">Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: false
+Received: true
+    at Object.&lt;anonymous&gt; (C:\Users\gerardo.leyton\Documents\sofka\trainning\taller2_Scramble  Refactor - El Reto\restaurante_grupo2\restaurant-backend\order-service\tests\integration\rabbitmq.integration.test.ts:332:35)</pre></div></div></div></details><details id="suite-2" class="suite-container" open=""><summary class="suite-info"><div class="suite-path">C:\Users\gerardo.leyton\Documents\sofka\trainning\taller2_Scramble  Refactor - El Reto\restaurante_grupo2\restaurant-backend\order-service\tests\integration\rabbitmq.integration.test.ts</div><div class="suite-time warn">26.864s</div></summary><div class="suite-tests"><div class="test-result passed"><div class="test-info"><div class="test-suitename">RabbitMQ Integration Tests - Producer -&gt; Broker -&gt; Consumer &gt; Connection Tests</div><div class="test-title">should connect to RabbitMQ successfully</div><div class="test-status">passed</div><div class="test-duration">0.172s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">RabbitMQ Integration Tests - Producer -&gt; Broker -&gt; Consumer &gt; Connection Tests</div><div class="test-title">should throw error when publishing without connection</div><div class="test-status">passed</div><div class="test-duration">0.122s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">RabbitMQ Integration Tests - Producer -&gt; Broker -&gt; Consumer &gt; Connection Tests</div><div class="test-title">should handle connection errors gracefully</div><div class="test-status">passed</div><div class="test-duration">7.474s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">RabbitMQ Integration Tests - Producer -&gt; Broker -&gt; Consumer &gt; Message Routing and Routing Keys</div><div class="test-title">should route messages correctly based on routing key pattern</div><div class="test-status">passed</div><div class="test-duration">1.309s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">RabbitMQ Integration Tests - Producer -&gt; Broker -&gt; Consumer &gt; Error Handling in Message Processing</div><div class="test-title">should handle consumer errors without breaking the connection</div><div class="test-status">passed</div><div class="test-duration">1.249s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">RabbitMQ Integration Tests - Producer -&gt; Broker -&gt; Consumer &gt; Message Persistence and Acknowledgments</div><div class="test-title">should persist messages with durable exchange and queue</div><div class="test-status">passed</div><div class="test-duration">1.15s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">RabbitMQ Integration Tests - Producer -&gt; Broker -&gt; Consumer &gt; Message Persistence and Acknowledgments</div><div class="test-title">should acknowledge messages after successful processing</div><div class="test-status">passed</div><div class="test-duration">0.934s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">RabbitMQ Integration Tests - Producer -&gt; Broker -&gt; Consumer &gt; Real-World Scenario: Complete Review Workflow</div><div class="test-title">should handle complete review lifecycle through RabbitMQ</div><div class="test-status">passed</div><div class="test-duration">2.345s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">RabbitMQ Integration Tests - Producer -&gt; Broker -&gt; Consumer &gt; Performance and Scalability</div><div class="test-title">should handle multiple messages in quick succession</div><div class="test-status">passed</div><div class="test-duration">2.635s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">RabbitMQ Integration Tests - Producer -&gt; Broker -&gt; Consumer &gt; Performance and Scalability</div><div class="test-title">should measure message latency</div><div class="test-status">passed</div><div class="test-duration">2.277s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">RabbitMQ Integration Tests - Producer -&gt; Broker -&gt; Consumer &gt; Connection Resilience</div><div class="test-title">should reconnect after connection loss</div><div class="test-status">passed</div><div class="test-duration">0.161s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">RabbitMQ Integration Tests - Producer -&gt; Broker -&gt; Consumer &gt; Connection Resilience</div><div class="test-title">should handle graceful shutdown</div><div class="test-status">passed</div><div class="test-duration">0.173s</div></div></div></div></details></main></body></html>

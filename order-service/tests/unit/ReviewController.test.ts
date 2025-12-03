@@ -57,13 +57,13 @@ describe('ReviewController - Unit Tests', () => {
         comment: 'Excellent service!'
       };
 
-      const createdReview: IReview = {
+      const createdReview = {
         _id: 'mock-id-123',
         ...reviewData,
         status: 'pending' as ReviewStatus,
         createdAt: new Date(),
         updatedAt: new Date(),
-      } as IReview;
+      } as unknown as IReview;
 
       mockRequest.body = reviewData;
       mockService.createReview = jest.fn().mockResolvedValue(createdReview);
@@ -206,7 +206,7 @@ describe('ReviewController - Unit Tests', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      ] as IReview[];
+      ] as unknown as IReview[];
 
       const mockResponseData = {
         reviews: mockReviews,
@@ -294,7 +294,7 @@ describe('ReviewController - Unit Tests', () => {
 
   describe('getReviewById', () => {
     test('should return review when found', async () => {
-      const mockReview: IReview = {
+      const mockReview = {
         _id: 'review-123',
         orderId: 'ORD-001',
         customerName: 'John Doe',
@@ -306,7 +306,7 @@ describe('ReviewController - Unit Tests', () => {
         status: 'approved' as ReviewStatus,
         createdAt: new Date(),
         updatedAt: new Date(),
-      } as IReview;
+      } as unknown as IReview;
 
       mockRequest.params = { id: 'review-123' };
       mockService.getReviewById = jest.fn().mockResolvedValue(mockReview);
@@ -390,7 +390,7 @@ describe('ReviewController - Unit Tests', () => {
           },
           status: 'hidden',
         },
-      ] as IReview[];
+      ] as unknown as IReview[];
 
       const mockResponseData = {
         reviews: mockReviews,
@@ -437,7 +437,7 @@ describe('ReviewController - Unit Tests', () => {
 
   describe('changeReviewStatus', () => {
     test('should change status to approved', async () => {
-      const updatedReview: IReview = {
+      const updatedReview = {
         _id: 'review-123',
         orderId: 'ORD-001',
         customerName: 'John',
@@ -449,7 +449,7 @@ describe('ReviewController - Unit Tests', () => {
         status: 'approved' as ReviewStatus,
         createdAt: new Date(),
         updatedAt: new Date(),
-      } as IReview;
+      } as unknown as IReview;
 
       mockRequest.params = { id: 'review-123' };
       mockRequest.body = { status: 'approved' };
@@ -472,7 +472,7 @@ describe('ReviewController - Unit Tests', () => {
     });
 
     test('should change status to hidden', async () => {
-      const updatedReview: IReview = {
+      const updatedReview = {
         _id: 'review-123',
         orderId: 'ORD-001',
         customerName: 'John',
@@ -484,7 +484,7 @@ describe('ReviewController - Unit Tests', () => {
         status: 'hidden' as ReviewStatus,
         createdAt: new Date(),
         updatedAt: new Date(),
-      } as IReview;
+      } as unknown as IReview;
 
       mockRequest.params = { id: 'review-123' };
       mockRequest.body = { status: 'hidden' };
