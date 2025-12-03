@@ -5,6 +5,7 @@ import { connectDatabase } from './config/database';
 import { rabbitMQClient } from './rabbitmq/rabbitmqClient';
 import orderRoutes from './routes/orderRoutes';
 import reviewRoutes from './routes/reviewRoutes';
+import analyticsRoutes from './routes/analyticsRoutes';
 import { orderService } from './services/orderService';
 import { OrderStatus } from './models/Order';
 
@@ -29,6 +30,7 @@ app.get('/health', (req: Request, res: Response) => {
 // Rutas
 app.use('/orders', orderRoutes);
 app.use('/reviews', reviewRoutes);
+app.use('/', analyticsRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

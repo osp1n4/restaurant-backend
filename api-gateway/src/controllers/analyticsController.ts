@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { IServiceClient } from '../interfaces/IServiceClient';
 import { BaseHttpClient } from '../services/baseHttpClient';
+import { config } from '../config';
 
 /**
  * Controller de analíticas del API Gateway refactorizado
@@ -9,7 +10,8 @@ import { BaseHttpClient } from '../services/baseHttpClient';
 
 // Inyección de dependencias
 const orderServiceClient: IServiceClient = new BaseHttpClient(
-  process.env.ORDER_SERVICE_URL || 'http://order-service:3002'
+  config.services.orderService.url,
+  config.services.orderService.timeout
 );
 
 function hasRole(req: Request) {
