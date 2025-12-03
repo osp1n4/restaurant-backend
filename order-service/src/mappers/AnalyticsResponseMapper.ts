@@ -8,16 +8,29 @@ export class AnalyticsResponseMapper {
   mapToDTO(
     series: any[],
     productsSold: any[],
-    query: AnalyticsQueryDTO
+    query: AnalyticsQueryDTO,
+    previousPeriodSummary?: { totalOrders: number; totalRevenue: number; totalProductsSold: number } | null
   ): AnalyticsResponseDTO {
     const summary = this.calculateSummary(series);
+    const totalProductsSold = productsSold.reduce((sum, p) => sum + p.quantity, 0);
+    
+    // Calcular cambios porcentuales
+    const changes = this.calculatePercentageChanges(
+      summary.totalOrders,
+      summary.totalRevenue,
+      totalProductsSold,
+      previousPeriodSummary
+    );
     
     return {
       range: { from: query.from, to: query.to, groupBy: query.groupBy },
       summary: {
         totalOrders: summary.totalOrders,
         totalRevenue: Number(summary.totalRevenue.toFixed(2)),
-        avgPrepTime: null
+        avgPrepTime: null,
+        totalOrdersChange: changes.ordersChange,
+        totalRevenueChange: changes.revenueChange,
+        totalProductsSoldChange: changes.productsSoldChange
       },
       series: series.map((s: any) => ({
         period: s._id,
@@ -48,5 +61,35 @@ export class AnalyticsResponseMapper {
       quantity: p.quantity,
       revenue: Number(p.revenue.toFixed(2))
     }));
+  }
+
+  /**
+   * Calcula cambios porcentuales comparando período actual con anterior
+   */
+  private calculatePercentageChanges(
+    currentOrders: number,
+    currentRevenue: number,
+    currentProductsSold: number,
+    previousPeriod?: { totalOrders: number; totalRevenue: number; totalProductsSold: number } | null
+  ): { ordersChange: number | null; revenueChange: number | null; productsSoldChange: number | null } {
+    if (!previousPeriod) {
+      return {
+        ordersChange: null,
+        revenueChange: null,
+        productsSoldChange: null
+      };
+    }
+
+    const calculateChange = (current: number, previous: number): number | null => {
+      if (previous === 0) return null;
+      const change = ((current - previous) / previous) * 100;
+      return Number(change.toFixed(1));
+    };
+
+    return {
+      ordersChange: calculateChange(currentOrders, previousPeriod.totalOrders),
+      revenueChange: calculateChange(currentRevenue, previousPeriod.totalRevenue),
+      productsSoldChange: calculateChange(currentProductsSold, previousPeriod.totalProductsSold)
+    };
   }
 }

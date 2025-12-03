@@ -33,6 +33,11 @@ export class AnalyticsRepository implements IAnalyticsRepository {
       throw Object.assign(new Error('El rango de fechas excede el máximo permitido'), { code: 'RANGE_EXCEEDED' });
     }
 
+    // Calcular período anterior para comparación
+    const periodDuration = toDate.getTime() - fromDate.getTime();
+    const previousFromDate = new Date(fromDate.getTime() - periodDuration);
+    const previousToDate = new Date(fromDate.getTime() - 1); // Día antes del período actual
+
     // Usar estrategia de agrupación
     const strategy: IGroupingStrategy = GroupingStrategyFactory.create(groupBy);
     const periodExpr = strategy.getPeriodExpression();
@@ -87,8 +92,50 @@ export class AnalyticsRepository implements IAnalyticsRepository {
 
     const productsSold = await this.orderModel.aggregate(productsPipeline).exec();
 
-    // Usar mapper para transformar datos
-    return this.mapper.mapToDTO(series, productsSold, query);
+    // Obtener métricas del período anterior para calcular cambio porcentual
+    const previousSummary = await this.getPreviousPeriodSummary(previousFromDate, previousToDate);
+
+    // Usar mapper para transformar datos con comparación
+    return this.mapper.mapToDTO(series, productsSold, query, previousSummary);
+  }
+
+  /**
+   * Obtener resumen del período anterior para comparación
+   */
+  private async getPreviousPeriodSummary(fromDate: Date, toDate: Date): Promise<{ totalOrders: number; totalRevenue: number; totalProductsSold: number } | null> {
+    try {
+      const pipeline: any[] = [
+        { $match: { createdAt: { $gte: fromDate, $lte: toDate } } },
+        { $unwind: '$items' },
+        {
+          $group: {
+            _id: null,
+            uniqueOrders: { $addToSet: '$_id' },
+            totalRevenue: { $sum: { $multiply: ['$items.quantity', { $ifNull: ['$items.unitPrice', '$items.price'] }] } },
+            totalProductsSold: { $sum: '$items.quantity' }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            totalOrders: { $size: '$uniqueOrders' },
+            totalRevenue: 1,
+            totalProductsSold: 1
+          }
+        }
+      ];
+
+      const result = await this.orderModel.aggregate(pipeline).exec();
+      
+      if (!result || result.length === 0) {
+        return null;
+      }
+
+      return result[0];
+    } catch (error) {
+      console.error('Error obteniendo período anterior:', error);
+      return null;
+    }
   }
 
   streamCsv(query: CSVExportRequestDTO): Readable {
