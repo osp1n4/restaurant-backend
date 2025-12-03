@@ -4,6 +4,7 @@ import axios from 'axios';
 import orderRoutes from './routes/orderRoutes';
 import kitchenRoutes from './routes/kitchenRoutes';
 import userRoutes from './routes/userRoutes';
+import reviewRoutes from './routes/reviewRoutes';
 import { config, validateConfig } from './config';
 
 // Validar configuración al iniciar
@@ -29,6 +30,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use('/orders', orderRoutes);
 app.use('/kitchen', kitchenRoutes);
 app.use('/users', userRoutes);
+app.use('/reviews', reviewRoutes);
 
 app.get('/health', async (req: Request, res: Response) => {
   const healthStatus = {
@@ -56,9 +58,9 @@ app.get('/health', async (req: Request, res: Response) => {
       axios.get(`${config.services.kitchenService.url}/health`, { timeout: 2000 }),
     ]);
 
-    healthStatus.services.orderService.status = 
+    healthStatus.services.orderService.status =
       orderHealth.status === 'fulfilled' ? 'available' : 'unavailable';
-    healthStatus.services.kitchenService.status = 
+    healthStatus.services.kitchenService.status =
       kitchenHealth.status === 'fulfilled' ? 'available' : 'unavailable';
   } catch (error) {
     // Si falla la verificación, no afecta el health check principal
@@ -75,6 +77,7 @@ app.get('/', (req: Request, res: Response) => {
     endpoints: {
       orders: '/orders',
       kitchen: '/kitchen',
+      reviews: '/reviews',
       health: '/health',
       users: '/users',
     },
@@ -105,4 +108,3 @@ app.listen(PORT, () => {
   console.log(`📍 Order Service URL: ${config.services.orderService.url}`);
   console.log(`📍 Kitchen Service URL: ${config.services.kitchenService.url}`);
 });
-

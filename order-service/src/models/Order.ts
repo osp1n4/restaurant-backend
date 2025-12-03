@@ -14,6 +14,7 @@ export enum OrderStatus {
 export interface IOrder extends Document {
   orderNumber: string;
   customerName: string;
+  customerEmail: string;
   items: OrderItem[];
   status: OrderStatus;
   total: number;
@@ -38,35 +39,42 @@ const OrderItemSchema = new Schema({
 }, { _id: false });
 
 const OrderSchema = new Schema({
-  orderNumber: { 
-    type: String, 
-    required: true, 
-    unique: true,
-    index: true 
-  },
-  customerName: { 
-    type: String, 
+  orderNumber: {
+    type: String,
     required: true,
-    trim: true 
+    unique: true,
+    index: true
   },
-  items: { 
-    type: [OrderItemSchema], 
+  customerName: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  customerEmail: {
+    type: String,
+    required: true,
+    trim: true,
+    lowercase: true,
+    match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email address']
+  },
+  items: {
+    type: [OrderItemSchema],
     required: true,
     validate: {
       validator: (items: OrderItem[]) => items.length > 0,
       message: 'El pedido debe tener al menos un item'
     }
   },
-  status: { 
-    type: String, 
+  status: {
+    type: String,
     enum: Object.values(OrderStatus),
     default: OrderStatus.PENDING,
-    required: true 
+    required: true
   },
-  total: { 
-    type: Number, 
-    required: true, 
-    min: 0 
+  total: {
+    type: Number,
+    required: true,
+    min: 0
   }
 }, {
   timestamps: true,
@@ -90,4 +98,3 @@ OrderSchema.statics.generateOrderNumber = async function(): Promise<string> {
 
 // Modelo de Mongoose
 export const Order = mongoose.model<IOrder>('Order', OrderSchema);
-

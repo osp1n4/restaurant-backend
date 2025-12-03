@@ -1,0 +1,43 @@
+CONFIGURACIÓN PARA MONGODB COMPASS
+====================================
+
+OPCIÓN 1: URI de conexión básica
+---------------------------------
+mongodb://127.0.0.1:27017
+
+OPCIÓN 2: URI con parámetros explícitos
+----------------------------------------
+mongodb://127.0.0.1:27017/?authSource=admin&directConnection=true&serverSelectionTimeoutMS=2000
+
+OPCIÓN 3: URI para conectar directo a la base orders
+----------------------------------------------------
+mongodb://127.0.0.1:27017/orders?authSource=admin&directConnection=true
+
+OPCIÓN 4: URI para conectar directo a la base kitchen
+-----------------------------------------------------
+mongodb://127.0.0.1:27017/kitchen?authSource=admin&directConnection=true
+
+INSTRUCCIONES DETALLADAS:
+=========================
+
+1. Abre MongoDB Compass
+2. En la ventana de "New Connection"
+3. Pega EXACTAMENTE una de las URIs de arriba (empieza con OPCIÓN 1)
+4. NO configures autenticación
+5. NO configures SSL/TLS
+6. Haz clic en "Connect"
+
+Si la OPCIÓN 1 no funciona, intenta la OPCIÓN 2.
+Si aún no funciona, intenta OPCIÓN 3 para conectarte directamente a la base de datos 'orders'.
+
+BASES DE DATOS DISPONIBLES:
+===========================
+- orders   → Contiene: orders (2 docs), reviews (0 docs), test_connection (1 doc)
+- kitchen  → Contiene: kitchenorders
+
+VERIFICACIÓN:
+=============
+Una vez conectado, deberías poder:
+1. Ver las bases de datos en el panel izquierdo
+2. Expandir "orders" y ver las colecciones
+3. Hacer clic en la colección "orders" para ver los 2 pedidos existentes

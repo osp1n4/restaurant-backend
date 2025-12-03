@@ -15,7 +15,7 @@ class RabbitMQConsumer {
   async connect(): Promise<void> {
     try {
       const rabbitUrl = process.env.RABBITMQ_URL || 'amqp://rabbitmq:5672';
-      
+
       // Conectar con retry
       this.connection = await this.connectWithRetry(rabbitUrl);
       this.channel = await this.createChannel(this.connection);
@@ -130,7 +130,7 @@ class RabbitMQConsumer {
           type: rawEvent.type as OrderEvent['type'],
           orderId: rawEvent.orderId,
           timestamp: rawEvent.timestamp ? new Date(rawEvent.timestamp) : new Date(),
-          data: rawEvent.data || rawEvent
+          data: rawEvent  // ✅ Pasar TODO el evento original, incluyendo orderNumber
         };
       } else if (rawEvent.orderId) {
         let inferredType: OrderEvent['type'] = 'order.created';
@@ -146,7 +146,7 @@ class RabbitMQConsumer {
           type: inferredType,
           orderId: rawEvent.orderId,
           timestamp: rawEvent.timestamp ? new Date(rawEvent.timestamp) : new Date(),
-          data: rawEvent
+          data: rawEvent  // ✅ Pasar TODO el evento original
         };
       }
 
@@ -156,7 +156,7 @@ class RabbitMQConsumer {
       }
 
       console.log(`📨 Evento recibido: ${event.type} - Order #${event.orderId}`);
-      
+
       // Delegar al servicio de notificaciones
       notificationService.handleOrderEvent(event);
     } catch (error) {

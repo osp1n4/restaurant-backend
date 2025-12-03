@@ -17,4 +17,6 @@ export interface Notification {
   orderId: string;
   timestamp: Date;
   eventType?: string;
+  orderNumber?: string;  // ✅ Incluir orderNumber
+  data?: any;            // ✅ Datos adicionales del evento
 }

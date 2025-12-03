@@ -92,6 +92,21 @@ export class BaseHttpClient {
   }
 
   /**
+   * Realiza una petición PATCH
+   */
+  async patch<T = any>(url: string, data?: any): Promise<ServiceResponse<T>> {
+    try {
+      const response = await this.client.patch<T>(url, data);
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      return this.handleError(error as AxiosError);
+    }
+  }
+
+  /**
    * Realiza una petición DELETE
    */
   async delete<T = any>(url: string): Promise<ServiceResponse<T>> {
@@ -106,4 +121,3 @@ export class BaseHttpClient {
     }
   }
 }
-
