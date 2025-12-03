@@ -333,4 +333,3 @@ Referencias del workspace
 - [`kitchen-service.KitchenService`](kitchen-service/src/services/kitchenService.ts)
 - Documentación existente: [ENDPOINTS_POSTMAN.md](ENDPOINTS_POSTMAN.md), [EJEMPLO_FRONTEND.md](EJEMPLO_FRONTEND.md)
 
-Fin del documento.
