@@ -7,4 +7,5 @@ coverage/
 *.swp
 *.swo
 *~
+api-gateway/serviceAccountKey.json
 
