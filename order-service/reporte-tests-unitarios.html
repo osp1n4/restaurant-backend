@@ -1,0 +1,435 @@
+<html><head><meta charset="utf-8"/><title>Reporte de Pruebas Unitarias - Dashboard Analíticas</title><style type="text/css">html,
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1rem;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+body {
+  padding: 2rem 1rem;
+  font-size: 0.85rem;
+}
+.jesthtml-content {
+  margin: 0 auto;
+  max-width: 70rem;
+}
+header {
+  display: flex;
+  align-items: center;
+}
+#title {
+  margin: 0;
+  flex-grow: 1;
+}
+#logo {
+  height: 4rem;
+}
+#timestamp {
+  color: #777;
+  margin-top: 0.5rem;
+}
+
+/** SUMMARY */
+#summary {
+  color: #333;
+  margin: 2rem 0;
+  display: flex;
+  font-family: monospace;
+  font-size: 1rem;
+}
+#summary > div {
+  margin-right: 2rem;
+  background: #eee;
+  padding: 1rem;
+  min-width: 15rem;
+}
+#summary > div:last-child {
+  margin-right: 0;
+}
+@media only screen and (max-width: 720px) {
+  #summary {
+    flex-direction: column;
+  }
+  #summary > div {
+    margin-right: 0;
+    margin-top: 2rem;
+  }
+  #summary > div:first-child {
+    margin-top: 0;
+  }
+}
+
+.summary-total {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+.summary-passed {
+  color: #4f8a10;
+  border-left: 0.4rem solid #4f8a10;
+  padding-left: 0.5rem;
+}
+.summary-failed,
+.summary-obsolete-snapshots {
+  color: #d8000c;
+  border-left: 0.4rem solid #d8000c;
+  padding-left: 0.5rem;
+}
+.summary-pending {
+  color: #9f6000;
+  border-left: 0.4rem solid #9f6000;
+  padding-left: 0.5rem;
+}
+.summary-empty {
+  color: #999;
+  border-left: 0.4rem solid #999;
+}
+
+.test-result {
+  padding: 1rem;
+  margin-bottom: 0.25rem;
+}
+.test-result:last-child {
+  border: 0;
+}
+.test-result.passed {
+  background-color: #dff2bf;
+  color: #4f8a10;
+}
+.test-result.failed {
+  background-color: #ffbaba;
+  color: #d8000c;
+}
+.test-result.pending {
+  background-color: #ffdf61;
+  color: #9f6000;
+}
+
+.test-info {
+  display: flex;
+  justify-content: space-between;
+}
+.test-suitename {
+  width: 20%;
+  text-align: left;
+  font-weight: bold;
+  word-break: break-word;
+}
+.test-title {
+  width: 40%;
+  text-align: left;
+  font-style: italic;
+}
+.test-status {
+  width: 20%;
+  text-align: right;
+}
+.test-duration {
+  width: 10%;
+  text-align: right;
+  font-size: 0.75rem;
+}
+
+.failureMessages {
+  padding: 0 1rem;
+  margin-top: 1rem;
+  border-top: 1px dashed #d8000c;
+}
+.failureMessages.suiteFailure {
+  border-top: none;
+}
+.failureMsg {
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+}
+
+.suite-container {
+  margin-bottom: 2rem;
+}
+.suite-container > input[type="checkbox"] {
+  position: absolute;
+  left: -100vw;
+}
+.suite-container label {
+  display: block;
+}
+.suite-container .suite-tests {
+  overflow-y: hidden;
+  height: 0;
+}
+.suite-container > input[type="checkbox"]:checked ~ .suite-tests {
+  height: auto;
+  overflow: visible;
+}
+.suite-info {
+  padding: 1rem;
+  background-color: #eee;
+  color: #777;
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+.suite-info:hover {
+  background-color: #ddd;
+  cursor: pointer;
+}
+.suite-info .suite-path {
+  word-break: break-all;
+  flex-grow: 1;
+  font-family: monospace;
+  font-size: 1rem;
+}
+.suite-info .suite-time {
+  margin-left: 0.5rem;
+  padding: 0.2rem 0.3rem;
+  font-size: 0.75rem;
+}
+.suite-info .suite-time.warn {
+  background-color: #d8000c;
+  color: #fff;
+}
+.suite-info:before {
+  content: "\2303";
+  display: inline-block;
+  margin-right: 0.5rem;
+  transform: rotate(0deg);
+}
+.suite-container > input[type="checkbox"]:checked ~ label .suite-info:before {
+  transform: rotate(180deg);
+}
+
+/* CONSOLE LOGS */
+.suite-consolelog {
+  margin-bottom: 0.25rem;
+  padding: 1rem;
+  background-color: #efefef;
+}
+.suite-consolelog-header {
+  font-weight: bold;
+}
+.suite-consolelog-item {
+  padding: 0.5rem;
+}
+.suite-consolelog-item pre {
+  margin: 0.5rem 0;
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+}
+.suite-consolelog-item-origin {
+  color: #777;
+  font-weight: bold;
+}
+.suite-consolelog-item-message {
+  color: #000;
+  font-size: 1rem;
+  padding: 0 0.5rem;
+}
+
+/* OBSOLETE SNAPSHOTS */
+.suite-obsolete-snapshots {
+  margin-bottom: 0.25rem;
+  padding: 1rem;
+  background-color: #ffbaba;
+  color: #d8000c;
+}
+.suite-obsolete-snapshots-header {
+  font-weight: bold;
+}
+.suite-obsolete-snapshots-item {
+  padding: 0.5rem;
+}
+.suite-obsolete-snapshots-item pre {
+  margin: 0.5rem 0;
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+}
+.suite-obsolete-snapshots-item-message {
+  color: #000;
+  font-size: 1rem;
+  padding: 0 0.5rem;
+}
+</style></head><body><div class="jesthtml-content"><header><h1 id="title">Reporte de Pruebas Unitarias - Dashboard Analíticas</h1></header><div id="metadata-container"><div id="timestamp">Started: 02/12/2025 20:03:08</div><div id="summary"><div id="suite-summary"><div class="summary-total">Suites (5)</div><div class="summary-passed ">1 passed</div><div class="summary-failed ">4 failed</div><div class="summary-pending  summary-empty">0 pending</div></div><div id="test-summary"><div class="summary-total">Tests (66)</div><div class="summary-passed ">49 passed</div><div class="summary-failed ">17 failed</div><div class="summary-pending  summary-empty">0 pending</div></div></div></div><div id="suite-1" class="suite-container"><input id="collapsible-0" type="checkbox" class="toggle" checked="checked"/><label for="collapsible-0"><div class="suite-info"><div class="suite-path">C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\mappers\AnalyticsResponseMapper.test.ts</div><div class="suite-time warn">9.697s</div></div></label><div class="suite-tests"><div class="test-result failed"><div class="test-info"><div class="test-suitename">AnalyticsResponseMapper - Pruebas Unitarias &gt; mapToDTO</div><div class="test-title">debe mapear correctamente datos completos de series y productos</div><div class="test-status">failed</div><div class="test-duration">0.068s</div></div><div class="failureMessages"> <pre class="failureMsg">Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: "p-101"
+Received: undefined
+    at Object.&lt;anonymous&gt; (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\mappers\AnalyticsResponseMapper.test.ts:104:48)
+    at Promise.then.completed (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\utils.js:231:10)
+    at _callCircusTest (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:252:3)
+    at _runTestsForDescribeBlock (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:126:9)
+    at _runTestsForDescribeBlock (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:121:9)
+    at _runTestsForDescribeBlock (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:121:9)
+    at run (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:71:3)
+    at runAndTransformResultsToJestFormat (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+    at jestAdapter (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+    at runTestInternal (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-runner\build\runTest.js:367:16)
+    at runTest (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-runner\build\runTest.js:444:34)
+    at Object.worker (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-runner\build\testWorker.js:106:12)</pre></div></div><div class="test-result failed"><div class="test-info"><div class="test-suitename">AnalyticsResponseMapper - Pruebas Unitarias &gt; mapToDTO</div><div class="test-title">debe mapear productos con revenue correcto</div><div class="test-status">failed</div><div class="test-duration">0.002s</div></div><div class="failureMessages"> <pre class="failureMsg">Error: expect(received).toBeDefined()
+
+Received: undefined
+    at Object.&lt;anonymous&gt; (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\mappers\AnalyticsResponseMapper.test.ts:168:22)
+    at Promise.then.completed (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\utils.js:231:10)
+    at _callCircusTest (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:252:3)
+    at _runTestsForDescribeBlock (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:126:9)
+    at _runTestsForDescribeBlock (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:121:9)
+    at _runTestsForDescribeBlock (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:121:9)
+    at run (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:71:3)
+    at runAndTransformResultsToJestFormat (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+    at jestAdapter (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+    at runTestInternal (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-runner\build\runTest.js:367:16)
+    at runTest (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-runner\build\runTest.js:444:34)
+    at Object.worker (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-runner\build\testWorker.js:106:12)</pre></div></div><div class="test-result failed"><div class="test-info"><div class="test-suitename">AnalyticsResponseMapper - Pruebas Unitarias &gt; Edge cases</div><div class="test-title">debe manejar productos con nombres vacíos o caracteres especiales</div><div class="test-status">failed</div><div class="test-duration">0.002s</div></div><div class="failureMessages"> <pre class="failureMsg">Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: ""
+Received: undefined
+    at Object.&lt;anonymous&gt; (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\mappers\AnalyticsResponseMapper.test.ts:284:43)
+    at Promise.then.completed (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\utils.js:231:10)
+    at _callCircusTest (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:252:3)
+    at _runTestsForDescribeBlock (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:126:9)
+    at _runTestsForDescribeBlock (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:121:9)
+    at _runTestsForDescribeBlock (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:121:9)
+    at run (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:71:3)
+    at runAndTransformResultsToJestFormat (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+    at jestAdapter (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+    at runTestInternal (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-runner\build\runTest.js:367:16)
+    at runTest (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-runner\build\runTest.js:444:34)
+    at Object.worker (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-runner\build\testWorker.js:106:12)</pre></div></div></div></div><div id="suite-2" class="suite-container"><input id="collapsible-1" type="checkbox" class="toggle" checked="checked"/><label for="collapsible-1"><div class="suite-info"><div class="suite-path">C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\strategies\GroupingStrategies.test.ts</div><div class="suite-time warn">9.766s</div></div></label><div class="suite-tests"><div class="test-result failed"><div class="test-info"><div class="test-suitename">Estrategias de Agrupación - Pruebas Unitarias &gt; WeekGroupingStrategy</div><div class="test-title">debe formatear fecha a formato YYYY-WW (semana ISO 8601)</div><div class="test-status">failed</div><div class="test-duration">0.05s</div></div><div class="failureMessages"> <pre class="failureMsg">Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: "2025-01"
+Received: "2024-01"
+    at Object.&lt;anonymous&gt; (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\strategies\GroupingStrategies.test.ts:96:45)
+    at Promise.then.completed (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\utils.js:231:10)
+    at _callCircusTest (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:252:3)
+    at _runTestsForDescribeBlock (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:126:9)
+    at _runTestsForDescribeBlock (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:121:9)
+    at _runTestsForDescribeBlock (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:121:9)
+    at run (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:71:3)
+    at runAndTransformResultsToJestFormat (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+    at jestAdapter (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+    at runTestInternal (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-runner\build\runTest.js:367:16)
+    at runTest (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-runner\build\runTest.js:444:34)
+    at Object.worker (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-runner\build\testWorker.js:106:12)</pre></div></div></div></div><div id="suite-3" class="suite-container"><input id="collapsible-2" type="checkbox" class="toggle" checked="checked"/><label for="collapsible-2"><div class="suite-info"><div class="suite-path">C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\exporters\CSVExporter.test.ts</div><div class="suite-time warn">10.072s</div></div></label><div class="suite-tests"><div class="test-result failed"><div class="test-info"><div class="test-suitename">CSVExporter - Pruebas Unitarias &gt; export</div><div class="test-title">debe generar CSV con BOM UTF-8 y delimitador ";"</div><div class="test-status">failed</div><div class="test-duration">0.086s</div></div><div class="failureMessages"> <pre class="failureMsg">Error: expect(received).toContain(expected) // indexOf
+
+Expected substring: "period;totalOrders;totalRevenue;productName;quantity"
+Received string:    "﻿\"period\";\"totalOrders\";\"totalRevenue\";\"productName\";\"quantity\"
+\"2025-12\";\"10\";\"500\";\"Pizza\";\"20\"
+"
+    at Object.&lt;anonymous&gt; (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\exporters\CSVExporter.test.ts:90:19)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</pre></div></div><div class="test-result failed"><div class="test-info"><div class="test-suitename">CSVExporter - Pruebas Unitarias &gt; export</div><div class="test-title">debe combinar series y productos en filas (producto cruzado)</div><div class="test-status">failed</div><div class="test-duration">0.006s</div></div><div class="failureMessages"> <pre class="failureMsg">Error: expect(received).toContain(expected) // indexOf
+
+Expected substring: "2025-11;Pizza;20"
+Received string:    "﻿\"period\";\"productName\";\"quantity\"
+\"2025-11\";\"Pizza\";\"20\"
+\"2025-11\";\"Pasta\";\"10\"
+\"2025-12\";\"Pizza\";\"20\"
+\"2025-12\";\"Pasta\";\"10\"
+"
+    at Object.&lt;anonymous&gt; (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\exporters\CSVExporter.test.ts:127:19)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</pre></div></div><div class="test-result failed"><div class="test-info"><div class="test-suitename">CSVExporter - Pruebas Unitarias &gt; export</div><div class="test-title">debe incluir avgPrepTime como campo vacío si es null</div><div class="test-status">failed</div><div class="test-duration">0.007s</div></div><div class="failureMessages"> <pre class="failureMsg">Error: expect(received).toMatch(expected)
+
+Expected pattern: /2025-08;.*;Ensalada/
+Received string:  "\"2025-08\";\"\";\"Ensalada\""
+    at Object.&lt;anonymous&gt; (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\exporters\CSVExporter.test.ts:255:24)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</pre></div></div><div class="test-result failed"><div class="test-info"><div class="test-suitename">CSVExporter - Pruebas Unitarias &gt; export</div><div class="test-title">debe retornar stream válido incluso si series está vacía pero products no</div><div class="test-status">failed</div><div class="test-duration">0.005s</div></div><div class="failureMessages"> <pre class="failureMsg">Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: 2
+Received: 1
+    at Object.&lt;anonymous&gt; (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\exporters\CSVExporter.test.ts:285:28)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</pre></div></div><div class="test-result failed"><div class="test-info"><div class="test-suitename">CSVExporter - Pruebas Unitarias &gt; export</div><div class="test-title">debe generar CSV con valores numéricos formateados correctamente</div><div class="test-status">failed</div><div class="test-duration">0.005s</div></div><div class="failureMessages"> <pre class="failureMsg">Error: expect(received).toContain(expected) // indexOf
+
+Expected substring: "1000;50000.5;999;12345.67"
+Received string:    "﻿\"totalOrders\";\"totalRevenue\";\"quantity\";\"revenue\"
+\"1000\";\"50000.5\";\"999\";\"\"
+"
+    at Object.&lt;anonymous&gt; (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\exporters\CSVExporter.test.ts:316:19)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</pre></div></div><div class="test-result failed"><div class="test-info"><div class="test-suitename">CSVExporter - Pruebas Unitarias &gt; Error handling</div><div class="test-title">debe manejar errores en stringify y retornar stream con mensaje de error</div><div class="test-status">failed</div><div class="test-duration">0.003s</div></div><div class="failureMessages"> <pre class="failureMsg">Error: expect(received).toContain(expected) // indexOf
+
+Expected substring: "period;totalOrders"
+Received string:    "﻿\"period\";\"totalOrders\"
+\"2025-11\";\"5\"
+"
+    at Object.&lt;anonymous&gt; (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\exporters\CSVExporter.test.ts:354:19)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</pre></div></div></div></div><div id="suite-4" class="suite-container"><input id="collapsible-3" type="checkbox" class="toggle" checked="checked"/><label for="collapsible-3"><div class="suite-info"><div class="suite-path">C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\repositories\AnalyticsRepository.test.ts</div><div class="suite-time warn">12.155s</div></div></label><div class="suite-tests"><div class="test-result failed"><div class="test-info"><div class="test-suitename">AnalyticsRepository - Pruebas Unitarias &gt; Validación de rango de fechas</div><div class="test-title">debe permitir rango exacto de 12 meses</div><div class="test-status">failed</div><div class="test-duration">0s</div></div><div class="failureMessages"> <pre class="failureMsg">Error: El rango de fechas excede el máximo permitido
+    at AnalyticsRepository.getAnalytics (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\repositories\AnalyticsRepository.ts:33:27)
+    at Object.&lt;anonymous&gt; (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\repositories\AnalyticsRepository.test.ts:93:39)
+    at Promise.then.completed (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\utils.js:231:10)
+    at _callCircusTest (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:252:3)
+    at _runTestsForDescribeBlock (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:126:9)
+    at _runTestsForDescribeBlock (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:121:9)
+    at _runTestsForDescribeBlock (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:121:9)
+    at run (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\run.js:71:3)
+    at runAndTransformResultsToJestFormat (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+    at jestAdapter (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+    at runTestInternal (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-runner\build\runTest.js:367:16)
+    at runTest (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-runner\build\runTest.js:444:34)
+    at Object.worker (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\node_modules\jest-runner\build\testWorker.js:106:12)</pre></div></div><div class="test-result failed"><div class="test-info"><div class="test-suitename">AnalyticsRepository - Pruebas Unitarias &gt; Validación de rango de fechas</div><div class="test-title">debe permitir rangos menores a 12 meses</div><div class="test-status">failed</div><div class="test-duration">0.003s</div></div><div class="failureMessages"> <pre class="failureMsg">TypeError: Cannot read properties of undefined (reading 'toFixed')
+    at toFixed (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\mappers\AnalyticsResponseMapper.ts:49:33)
+    at Array.map (&lt;anonymous&gt;)
+    at AnalyticsResponseMapper.map [as mapProducts] (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\mappers\AnalyticsResponseMapper.ts:45:21)
+    at AnalyticsResponseMapper.mapProducts [as mapToDTO] (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\mappers\AnalyticsResponseMapper.ts:28:26)
+    at AnalyticsRepository.mapToDTO [as getAnalytics] (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\repositories\AnalyticsRepository.ts:91:24)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at Object.&lt;anonymous&gt; (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\repositories\AnalyticsRepository.test.ts:114:22)</pre></div></div><div class="test-result failed"><div class="test-info"><div class="test-suitename">AnalyticsRepository - Pruebas Unitarias &gt; Construcción de pipelines de agregación</div><div class="test-title">debe construir pipeline con stage $match para filtrar por rango de fechas</div><div class="test-status">failed</div><div class="test-duration">0.001s</div></div><div class="failureMessages"> <pre class="failureMsg">TypeError: Cannot read properties of undefined (reading 'toFixed')
+    at toFixed (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\mappers\AnalyticsResponseMapper.ts:49:33)
+    at Array.map (&lt;anonymous&gt;)
+    at AnalyticsResponseMapper.map [as mapProducts] (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\mappers\AnalyticsResponseMapper.ts:45:21)
+    at AnalyticsResponseMapper.mapProducts [as mapToDTO] (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\mappers\AnalyticsResponseMapper.ts:28:26)
+    at AnalyticsRepository.mapToDTO [as getAnalytics] (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\repositories\AnalyticsRepository.ts:91:24)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at Object.&lt;anonymous&gt; (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\repositories\AnalyticsRepository.test.ts:137:7)</pre></div></div><div class="test-result failed"><div class="test-info"><div class="test-suitename">AnalyticsRepository - Pruebas Unitarias &gt; Construcción de pipelines de agregación</div><div class="test-title">debe incluir stage $unwind para descomponer array de items</div><div class="test-status">failed</div><div class="test-duration">0.001s</div></div><div class="failureMessages"> <pre class="failureMsg">TypeError: Cannot read properties of undefined (reading 'toFixed')
+    at toFixed (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\mappers\AnalyticsResponseMapper.ts:49:33)
+    at Array.map (&lt;anonymous&gt;)
+    at AnalyticsResponseMapper.map [as mapProducts] (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\mappers\AnalyticsResponseMapper.ts:45:21)
+    at AnalyticsResponseMapper.mapProducts [as mapToDTO] (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\mappers\AnalyticsResponseMapper.ts:28:26)
+    at AnalyticsRepository.mapToDTO [as getAnalytics] (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\repositories\AnalyticsRepository.ts:91:24)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at Object.&lt;anonymous&gt; (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\repositories\AnalyticsRepository.test.ts:166:7)</pre></div></div><div class="test-result failed"><div class="test-info"><div class="test-suitename">AnalyticsRepository - Pruebas Unitarias &gt; Construcción de pipelines de agregación</div><div class="test-title">debe construir stage $group con expresión de periodo de la estrategia</div><div class="test-status">failed</div><div class="test-duration">0.001s</div></div><div class="failureMessages"> <pre class="failureMsg">TypeError: Cannot read properties of undefined (reading 'toFixed')
+    at toFixed (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\mappers\AnalyticsResponseMapper.ts:49:33)
+    at Array.map (&lt;anonymous&gt;)
+    at AnalyticsResponseMapper.map [as mapProducts] (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\mappers\AnalyticsResponseMapper.ts:45:21)
+    at AnalyticsResponseMapper.mapProducts [as mapToDTO] (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\mappers\AnalyticsResponseMapper.ts:28:26)
+    at AnalyticsRepository.mapToDTO [as getAnalytics] (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\repositories\AnalyticsRepository.ts:91:24)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at Object.&lt;anonymous&gt; (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\repositories\AnalyticsRepository.test.ts:190:7)</pre></div></div><div class="test-result failed"><div class="test-info"><div class="test-suitename">AnalyticsRepository - Pruebas Unitarias &gt; Construcción de pipelines de agregación</div><div class="test-title">debe incluir acumuladores para totalOrders y totalRevenue</div><div class="test-status">failed</div><div class="test-duration">0s</div></div><div class="failureMessages"> <pre class="failureMsg">TypeError: Cannot read properties of undefined (reading 'toFixed')
+    at toFixed (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\mappers\AnalyticsResponseMapper.ts:49:33)
+    at Array.map (&lt;anonymous&gt;)
+    at AnalyticsResponseMapper.map [as mapProducts] (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\mappers\AnalyticsResponseMapper.ts:45:21)
+    at AnalyticsResponseMapper.mapProducts [as mapToDTO] (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\mappers\AnalyticsResponseMapper.ts:28:26)
+    at AnalyticsRepository.mapToDTO [as getAnalytics] (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\repositories\AnalyticsRepository.ts:91:24)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at Object.&lt;anonymous&gt; (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\repositories\AnalyticsRepository.test.ts:214:7)</pre></div></div><div class="test-result failed"><div class="test-info"><div class="test-suitename">AnalyticsRepository - Pruebas Unitarias &gt; Casos edge</div><div class="test-title">debe manejar fechas con hora distinta de medianoche</div><div class="test-status">failed</div><div class="test-duration">0s</div></div><div class="failureMessages"> <pre class="failureMsg">TypeError: Cannot read properties of undefined (reading 'toFixed')
+    at toFixed (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\mappers\AnalyticsResponseMapper.ts:49:33)
+    at Array.map (&lt;anonymous&gt;)
+    at AnalyticsResponseMapper.map [as mapProducts] (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\mappers\AnalyticsResponseMapper.ts:45:21)
+    at AnalyticsResponseMapper.mapProducts [as mapToDTO] (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\mappers\AnalyticsResponseMapper.ts:28:26)
+    at AnalyticsRepository.mapToDTO [as getAnalytics] (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\src\repositories\AnalyticsRepository.ts:91:24)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at Object.&lt;anonymous&gt; (C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\repositories\AnalyticsRepository.test.ts:496:22)</pre></div></div></div></div><div id="suite-5" class="suite-container"><input id="collapsible-4" type="checkbox" class="toggle" checked="checked"/><label for="collapsible-4"><div class="suite-info"><div class="suite-path">C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\services\analyticsService.test.ts</div><div class="suite-time warn">9.406s</div></div></label><div class="suite-tests"><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsService - Pruebas Unitarias &gt; getAnalytics</div><div class="test-title">debe delegar llamada al repositorio con los parámetros correctos</div><div class="test-status">passed</div><div class="test-duration">0.027s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsService - Pruebas Unitarias &gt; getAnalytics</div><div class="test-title">debe retornar null si el repositorio retorna null</div><div class="test-status">passed</div><div class="test-duration">0.002s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsService - Pruebas Unitarias &gt; getAnalytics</div><div class="test-title">debe propagar errores del repositorio sin modificarlos</div><div class="test-status">passed</div><div class="test-duration">0.037s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsService - Pruebas Unitarias &gt; getAnalytics</div><div class="test-title">debe funcionar correctamente con query sin parámetro "top" (opcional)</div><div class="test-status">passed</div><div class="test-duration">0.002s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsService - Pruebas Unitarias &gt; streamCsv</div><div class="test-title">debe delegar llamada de stream CSV al repositorio</div><div class="test-status">passed</div><div class="test-duration">0.006s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsService - Pruebas Unitarias &gt; streamCsv</div><div class="test-title">debe retornar stream válido que puede ser consumido</div><div class="test-status">passed</div><div class="test-duration">0.006s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsService - Pruebas Unitarias &gt; streamCsv</div><div class="test-title">debe funcionar con query que tiene columnas vacías (usar defaults)</div><div class="test-status">passed</div><div class="test-duration">0.004s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsService - Pruebas Unitarias &gt; Responsabilidad única</div><div class="test-title">el servicio no debe contener lógica de negocio, solo delegación</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsService - Pruebas Unitarias &gt; Responsabilidad única</div><div class="test-title">el servicio no debe validar parámetros (responsabilidad del controller/repository)</div><div class="test-status">passed</div><div class="test-duration">0.003s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsService - Pruebas Unitarias &gt; Integración con interfaces</div><div class="test-title">debe cumplir con el contrato IAnalyticsService</div><div class="test-status">passed</div><div class="test-duration">0.003s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsService - Pruebas Unitarias &gt; Integración con interfaces</div><div class="test-title">debe aceptar cualquier implementación de IAnalyticsRepository</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div></div></div><div id="suite-6" class="suite-container"><input id="collapsible-5" type="checkbox" class="toggle" checked="checked"/><label for="collapsible-5"><div class="suite-info"><div class="suite-path">C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\mappers\AnalyticsResponseMapper.test.ts</div><div class="suite-time warn">9.697s</div></div></label><div class="suite-tests"><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsResponseMapper - Pruebas Unitarias &gt; mapToDTO</div><div class="test-title">debe redondear totalRevenue del summary a 2 decimales</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsResponseMapper - Pruebas Unitarias &gt; mapToDTO</div><div class="test-title">debe manejar series vacías correctamente</div><div class="test-status">passed</div><div class="test-duration">0.002s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsResponseMapper - Pruebas Unitarias &gt; mapToDTO</div><div class="test-title">debe mantener avgPrepTime como null si no está disponible</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsResponseMapper - Pruebas Unitarias &gt; mapToDTO</div><div class="test-title">debe preservar el orden de las series tal como vienen de MongoDB</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsResponseMapper - Pruebas Unitarias &gt; mapToDTO</div><div class="test-title">debe copiar topNProducts desde productsSold</div><div class="test-status">passed</div><div class="test-duration">0.002s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsResponseMapper - Pruebas Unitarias &gt; mapToDTO</div><div class="test-title">debe incluir el parámetro top del query en el rango si está presente</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsResponseMapper - Pruebas Unitarias &gt; Edge cases</div><div class="test-title">debe manejar totalRevenue con valores muy grandes sin perder precisión</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div></div></div><div id="suite-7" class="suite-container"><input id="collapsible-6" type="checkbox" class="toggle" checked="checked"/><label for="collapsible-6"><div class="suite-info"><div class="suite-path">C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\strategies\GroupingStrategies.test.ts</div><div class="suite-time warn">9.766s</div></div></label><div class="suite-tests"><div class="test-result passed"><div class="test-info"><div class="test-suitename">Estrategias de Agrupación - Pruebas Unitarias &gt; DayGroupingStrategy</div><div class="test-title">debe generar expresión MongoDB correcta para agrupación diaria</div><div class="test-status">passed</div><div class="test-duration">0.106s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">Estrategias de Agrupación - Pruebas Unitarias &gt; DayGroupingStrategy</div><div class="test-title">debe formatear fecha a formato YYYY-MM-DD</div><div class="test-status">passed</div><div class="test-duration">0.004s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">Estrategias de Agrupación - Pruebas Unitarias &gt; DayGroupingStrategy</div><div class="test-title">debe retornar "day" como tipo de agrupación</div><div class="test-status">passed</div><div class="test-duration">0.002s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">Estrategias de Agrupación - Pruebas Unitarias &gt; WeekGroupingStrategy</div><div class="test-title">debe generar expresión MongoDB correcta para agrupación semanal</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">Estrategias de Agrupación - Pruebas Unitarias &gt; WeekGroupingStrategy</div><div class="test-title">debe retornar "week" como tipo de agrupación</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">Estrategias de Agrupación - Pruebas Unitarias &gt; MonthGroupingStrategy</div><div class="test-title">debe generar expresión MongoDB correcta para agrupación mensual</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">Estrategias de Agrupación - Pruebas Unitarias &gt; MonthGroupingStrategy</div><div class="test-title">debe formatear fecha a formato YYYY-MM</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">Estrategias de Agrupación - Pruebas Unitarias &gt; MonthGroupingStrategy</div><div class="test-title">debe manejar correctamente meses de un solo dígito</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">Estrategias de Agrupación - Pruebas Unitarias &gt; MonthGroupingStrategy</div><div class="test-title">debe retornar "month" como tipo de agrupación</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">Estrategias de Agrupación - Pruebas Unitarias &gt; YearGroupingStrategy</div><div class="test-title">debe generar expresión MongoDB correcta para agrupación anual</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">Estrategias de Agrupación - Pruebas Unitarias &gt; YearGroupingStrategy</div><div class="test-title">debe formatear fecha a formato YYYY</div><div class="test-status">passed</div><div class="test-duration">0s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">Estrategias de Agrupación - Pruebas Unitarias &gt; YearGroupingStrategy</div><div class="test-title">debe retornar "year" como tipo de agrupación</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">Estrategias de Agrupación - Pruebas Unitarias &gt; GroupingStrategyFactory</div><div class="test-title">debe crear DayGroupingStrategy cuando groupBy es "day"</div><div class="test-status">passed</div><div class="test-duration">0.002s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">Estrategias de Agrupación - Pruebas Unitarias &gt; GroupingStrategyFactory</div><div class="test-title">debe crear WeekGroupingStrategy cuando groupBy es "week"</div><div class="test-status">passed</div><div class="test-duration">0.002s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">Estrategias de Agrupación - Pruebas Unitarias &gt; GroupingStrategyFactory</div><div class="test-title">debe crear MonthGroupingStrategy cuando groupBy es "month"</div><div class="test-status">passed</div><div class="test-duration">0s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">Estrategias de Agrupación - Pruebas Unitarias &gt; GroupingStrategyFactory</div><div class="test-title">debe crear YearGroupingStrategy cuando groupBy es "year"</div><div class="test-status">passed</div><div class="test-duration">0s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">Estrategias de Agrupación - Pruebas Unitarias &gt; GroupingStrategyFactory</div><div class="test-title">debe retornar MonthGroupingStrategy por defecto si groupBy no es válido</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">Estrategias de Agrupación - Pruebas Unitarias &gt; GroupingStrategyFactory</div><div class="test-title">debe crear estrategias independientes (no singleton)</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div></div></div><div id="suite-8" class="suite-container"><input id="collapsible-7" type="checkbox" class="toggle" checked="checked"/><label for="collapsible-7"><div class="suite-info"><div class="suite-path">C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\exporters\CSVExporter.test.ts</div><div class="suite-time warn">10.072s</div></div></label><div class="suite-tests"><div class="test-result passed"><div class="test-info"><div class="test-suitename">CSVExporter - Pruebas Unitarias &gt; export</div><div class="test-title">debe usar columnas por defecto si no se especifican</div><div class="test-status">passed</div><div class="test-duration">0.006s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">CSVExporter - Pruebas Unitarias &gt; export</div><div class="test-title">debe manejar datos nulos (sin analytics) generando CSV vacío</div><div class="test-status">passed</div><div class="test-duration">0.005s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">CSVExporter - Pruebas Unitarias &gt; export</div><div class="test-title">debe escapar correctamente caracteres especiales en nombres de productos</div><div class="test-status">passed</div><div class="test-duration">0.011s</div></div></div></div></div><div id="suite-9" class="suite-container"><input id="collapsible-8" type="checkbox" class="toggle" checked="checked"/><label for="collapsible-8"><div class="suite-info"><div class="suite-path">C:\Users\nevardo.ospina\Documents\TRAINING IA NATIVE DEV Y QA\Taller 2 Scramble  Refactor - El Reto\Restaurant Grupo 2\restaurant-backend\order-service\tests\unit\repositories\AnalyticsRepository.test.ts</div><div class="suite-time warn">12.155s</div></div></label><div class="suite-tests"><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsRepository - Pruebas Unitarias &gt; Validación de rango de fechas</div><div class="test-title">debe lanzar error RANGE_EXCEEDED si el rango supera 12 meses</div><div class="test-status">passed</div><div class="test-duration">0.031s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsRepository - Pruebas Unitarias &gt; Pipeline de productos vendidos</div><div class="test-title">debe ejecutar segundo aggregate para obtener productos vendidos</div><div class="test-status">passed</div><div class="test-duration">0s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsRepository - Pruebas Unitarias &gt; Pipeline de productos vendidos</div><div class="test-title">debe limitar productos con $limit basado en parámetro top</div><div class="test-status">passed</div><div class="test-duration">0s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsRepository - Pruebas Unitarias &gt; Pipeline de productos vendidos</div><div class="test-title">debe usar top por defecto de 10 si no se especifica</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsRepository - Pruebas Unitarias &gt; Manejo de datos vacíos</div><div class="test-title">debe retornar null si aggregate de series retorna array vacío</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsRepository - Pruebas Unitarias &gt; Manejo de datos vacíos</div><div class="test-title">debe retornar DTO completo aunque productos esté vacío</div><div class="test-status">passed</div><div class="test-duration">0s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsRepository - Pruebas Unitarias &gt; Integración con Mapper</div><div class="test-title">debe delegar mapeo de datos a AnalyticsResponseMapper</div><div class="test-status">passed</div><div class="test-duration">0.002s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsRepository - Pruebas Unitarias &gt; streamCsv</div><div class="test-title">debe retornar stream de CSV generado por CSVExporter</div><div class="test-status">passed</div><div class="test-duration">0.004s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsRepository - Pruebas Unitarias &gt; streamCsv</div><div class="test-title">el stream debe ser consumible y contener datos CSV</div><div class="test-status">passed</div><div class="test-duration">0.003s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">AnalyticsRepository - Pruebas Unitarias &gt; Casos edge</div><div class="test-title">debe manejar fechas en borde de año correctamente</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div></div></div></div></body></html>

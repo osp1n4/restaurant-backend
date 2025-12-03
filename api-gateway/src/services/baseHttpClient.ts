@@ -1,11 +1,13 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import { ServiceResponse } from '../types';
+import { IServiceClient } from '../interfaces/IServiceClient';
 
 /**
  * Cliente HTTP base reutilizable para comunicación con servicios backend
  * Aplica DRY y Single Responsibility Principle
+ * Cumple con Dependency Inversion Principle: Implementa IServiceClient
  */
-export class BaseHttpClient {
+export class BaseHttpClient implements IServiceClient {
   private client: AxiosInstance;
 
   constructor(baseURL: string, timeout: number = 10000) {

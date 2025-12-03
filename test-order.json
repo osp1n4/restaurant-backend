@@ -1,0 +1,15 @@
+{
+  "customerName": "Test User",
+  "items": [
+    {
+      "name": "Pizza",
+      "quantity": 2,
+      "price": 15.99
+    },
+    {
+      "name": "Pasta",
+      "quantity": 1,
+      "price": 12.50
+    }
+  ]
+}

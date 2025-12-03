@@ -2,9 +2,6 @@
 
 Sistema de procesamiento de pedidos para restaurante con arquitectura de microservicios.
 
-<img width="1863" height="349" alt="image" src="https://github.com/user-attachments/assets/27d49b0e-7f84-4b1a-bcf9-d7134419b373" />
-
-
 ## 🏗️ Arquitectura
 
 - **API Gateway** (Puerto 3000): Punto de entrada único

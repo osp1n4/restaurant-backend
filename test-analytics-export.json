@@ -1,0 +1,7 @@
+{
+  "from": "2025-11-01",
+  "to": "2025-12-31",
+  "groupBy": "month",
+  "top": 5,
+  "columns": ["period", "totalOrders", "totalRevenue", "productId", "productName", "quantity", "avgPrepTime"]
+}

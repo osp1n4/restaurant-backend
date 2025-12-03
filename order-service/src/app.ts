@@ -27,6 +27,9 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Rutas - Montadas en la raíz para mantener compatibilidad con rutas internas
+app.use('/', orderRoutes);
+
 // Inicializar servicios
 async function startServer() {
   try {
