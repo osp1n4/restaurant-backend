@@ -1,19 +1,25 @@
 // Setup global para los tests
 import mongoose from 'mongoose';
 
-// Mock de mongoose
-jest.mock('mongoose', () => {
-  const actualMongoose = jest.requireActual('mongoose');
-  return {
-    ...actualMongoose,
-    connect: jest.fn(),
-    disconnect: jest.fn(),
-    connection: {
-      readyState: 1,
-      close: jest.fn()
-    }
-  };
-});
+// Mock de mongoose SOLO para pruebas unitarias.
+// En integración (TEST_LEVEL=integration) NO se mockea para usar conexión real.
+const isIntegration = process.env.TEST_LEVEL === 'integration';
+if (!isIntegration) {
+  jest.mock('mongoose', () => {
+    const actualMongoose = jest.requireActual('mongoose');
+    return {
+      ...actualMongoose,
+      connect: jest.fn(),
+      disconnect: jest.fn(),
+      connection: {
+        readyState: 1,
+        close: jest.fn(),
+        on: jest.fn(),
+        once: jest.fn()
+      }
+    };
+  });
+}
 
 // Mock de rabbitMQClient
 jest.mock('../src/rabbitmq/rabbitmqClient', () => ({
