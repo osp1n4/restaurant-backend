@@ -1,5 +1,5 @@
 import { KitchenOrder, IKitchenOrder } from '../models/KitchenOrder';
-import { RabbitMQClient } from '../rabbitmq/rabbitmqClient';
+import { IEventPublisher } from '../interfaces/IEventPublisher';
 
 export interface OrderCreatedEvent {
   orderId: string;
@@ -19,7 +19,13 @@ export interface OrderCreatedEvent {
 }
 
 export class KitchenService {
-  constructor(private rabbitMQClient: RabbitMQClient) {}
+  /**
+   * Constructor con Dependency Injection
+   * Principio SOLID: Dependency Inversion Principle (DIP)
+   *
+   * @param eventPublisher - Abstracción para publicar eventos (no implementación concreta)
+   */
+  constructor(private readonly eventPublisher: IEventPublisher) {}
 
   /**
    * Maneja el evento order.created del order-service
@@ -57,7 +63,7 @@ export class KitchenService {
       console.log(`✅ Kitchen order saved: ${orderData.orderNumber || orderData.orderId}`);
 
       // Publicar evento order.received para notification-service
-      await this.rabbitMQClient.publish('order.received', {
+      await this.eventPublisher.publish('order.received', {
         type: 'order.received',
         orderId: orderData.orderId,
         orderNumber: orderData.orderNumber,  // ✅ Incluir orderNumber
@@ -113,7 +119,7 @@ export class KitchenService {
       console.log(`👨‍🍳 Order ${order.orderNumber || orderId} is now PREPARING`);
 
       // Publicar evento order.preparing para notification-service
-      await this.rabbitMQClient.publish('order.preparing', {
+      await this.eventPublisher.publish('order.preparing', {
         type: 'order.preparing',
         orderId: order.orderId,
         orderNumber: order.orderNumber,  // ✅ Incluir orderNumber
@@ -168,7 +174,7 @@ export class KitchenService {
       console.log(`✅ Order ${order.orderNumber || orderId} is now READY`);
 
       // Publicar evento order.ready para notification-service
-      await this.rabbitMQClient.publish('order.ready', {
+      await this.eventPublisher.publish('order.ready', {
         type: 'order.ready',
         orderId: order.orderId,
         orderNumber: order.orderNumber,  // ✅ Incluir orderNumber
@@ -202,7 +208,7 @@ export class KitchenService {
   async handleOrderCancelled(orderData: any): Promise<IKitchenOrder | null> {
     try {
       const { orderId, previousStatus, reason, cancelledBy } = orderData;
-      
+
       console.log(`🚫 Procesando cancelación de pedido: ${orderId}`);
 
       const kitchenOrder = await KitchenOrder.findOne({ orderId });

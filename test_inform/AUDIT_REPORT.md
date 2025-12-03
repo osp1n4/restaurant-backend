@@ -445,7 +445,7 @@ No hay JWT, OAuth, o ningún mecanismo de autenticación.
    - Validación de pedido entregado
 
 2. **Listar reseñas públicas** (GET /reviews)
-   - Solo reseñas aprobadas
+   
    - Paginación (10 por página)
    - Ordenadas por fecha descendente
 
@@ -1190,7 +1190,77 @@ describe('API Gateway - Review Routes Integration', () => {
 
 ---
 
-#### 4.1.3 Pruebas End-to-End (E2E) - Manuales
+#### 4.1.3 Pruebas de Cancelación de Pedidos
+
+**Funcionalidad adicional implementada:** Sistema de cancelación de pedidos con validación de estados.
+
+**Archivos de prueba:**
+
+**A) orderService.cancelOrder.unit.test.ts** (8 tests unitarios)
+
+```typescript
+describe('OrderService - cancelOrder Unit Tests', () => {
+  test('should cancel order in PENDING status', async () => {
+    // Valida cancelación exitosa
+  });
+
+  test('should reject cancellation in PREPARING status', async () => {
+    // No se puede cancelar pedido en preparación
+  });
+
+  test('should register cancellation history', async () => {
+    // Auditoría de cancelaciones
+  });
+
+  // ... 5 tests más
+});
+```
+
+**Casos de prueba:**
+1. ✅ Cancelar pedido en estado PENDING
+2. ❌ Rechazar cancelación en PREPARING
+3. ❌ Rechazar cancelación en READY
+4. ❌ Rechazar cancelación en DELIVERED
+5. ✅ Registrar historial de cancelación
+6. ✅ Usar razón por defecto ("Sin especificar")
+7. ❌ Error si pedido no existe
+8. ✅ Publicar evento `order.cancelled` con payload correcto
+
+**Cobertura:**
+- Líneas: ~90%
+- Funciones: 100% (cancelOrder)
+- Ramas: 100% (if/else)
+- Velocidad: <50ms por test
+
+---
+
+**B) orderService.cancelOrder.integration.test.ts** (1 test de integración)
+
+```typescript
+describe('OrderService - cancelOrder Integration Tests', () => {
+  test('should publish order.cancelled event to RabbitMQ', async () => {
+    // Flujo completo: Order Service → RabbitMQ → Consumer
+  });
+});
+```
+
+**Infraestructura:** RabbitMQ real (docker-compose)
+**Timeout:** 15s (incluye publicación + consumo)
+**Objetivo:** Validar comunicación asíncrona end-to-end
+
+**Principios FIRST aplicados:**
+
+| Principio | Aplicación |
+|-----------|------------|
+| **F** (Fast) | Unitarias <50ms, integración <15s |
+| **I** (Isolated) | Mocks resetean entre tests |
+| **R** (Repeatable) | Mismos resultados en local, CI/CD, Docker |
+| **S** (Self-validating) | Assertions claras sin interpretación |
+| **T** (Timely) | Escritas antes de refactorizar |
+
+---
+
+#### 4.1.4 Pruebas End-to-End (E2E) - Manuales
 
 **¿Qué son?**
 Pruebas que simulan el flujo completo del usuario desde la interfaz hasta la base de datos.

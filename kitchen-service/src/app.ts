@@ -17,8 +17,8 @@ app.use(express.json());
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
+  res.json({
+    status: 'ok',
     service: 'kitchen-service',
     mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
     timestamp: new Date().toISOString()
@@ -39,8 +39,10 @@ async function startServer() {
     await rabbitMQClient.connect(RABBITMQ_URL);
     console.log('✅ RabbitMQ conectado');
 
-    // 3. Crear instancias de servicio, controlador y rutas
-    const kitchenService = new KitchenService(rabbitMQClient);
+    // 3. Crear instancias de servicio, controlador y rutas con Dependency Injection
+    const { RabbitMQEventPublisher } = await import('./adapters/RabbitMQEventPublisher');
+    const eventPublisher = new RabbitMQEventPublisher(rabbitMQClient);
+    const kitchenService = new KitchenService(eventPublisher);
     const kitchenController = new KitchenController(kitchenService);
     const kitchenRoutes = createKitchenRoutes(kitchenController);
 
