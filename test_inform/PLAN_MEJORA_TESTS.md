@@ -44,4 +44,3 @@ Aumentar la cobertura y calidad de los tests unitarios en el proyecto, priorizan
 - Mantener actualizado el reporte de cobertura.
 
 ---
-¿Quieres ejemplos de tests para alguno de los archivos prioritarios?

@@ -1,7 +1,7 @@
 # 📊 ANÁLISIS SOLID POST-REFACTORIZACIÓN
 ## Dashboard de Analíticas de Ventas y Rendimiento
 
-**Analista:** Nevardo Ospina  
+
 **Fecha:** 2 de Diciembre de 2025  
 **Proyecto:** Restaurant Management System - Backend Analytics Module  
 **Branch:** `feature/dashboar_estadistica`  
@@ -1289,4 +1289,4 @@ export async function getAdminAnalytics(req: Request, res: Response) {
 
 ---
 
-*Este análisis forma parte del proceso de mejora continua del módulo de analíticas. Se recomienda revisar este documento trimestralmente y actualizarlo conforme evolucione la arquitectura.*
+

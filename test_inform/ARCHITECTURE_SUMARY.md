@@ -50,4 +50,3 @@ Aunque no hay archivos `.env` adjuntos, las variables de entorno típicas pueden
 - **Orquestación:** Docker Compose
 
 ---
-¿Necesitas ejemplos concretos de variables de entorno en cada servicio o detalles adicionales?
