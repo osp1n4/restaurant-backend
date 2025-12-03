@@ -1,15 +1,15 @@
-import amqplib, { Connection, Channel, ConsumeMessage } from 'amqplib';
+import * as amqplib from 'amqplib';
 
 export class RabbitMQClient {
-  private connection: Connection | null = null;
-  private channel: Channel | null = null;
+  private connection: any = null;
+  private channel: any = null;
   private readonly exchange: string;
   private readonly MAX_RETRIES = 3;
   private url: string;
 
   constructor(exchange: string = 'restaurant_orders') {
     this.exchange = exchange;
-    this.url = process.env.RABBITMQ_URL || 'amqp://rabbitmq:5672';
+    this.url = process.env.RABBITMQ_URL || 'amqp://localhost';
   }
 
   async connect(url?: string): Promise<void> {
@@ -30,7 +30,7 @@ export class RabbitMQClient {
       
       this.connection.on('close', () => {
         console.log('⚠️ RabbitMQ connection closed. Reconnecting...');
-        this.reconnect();
+        setTimeout(() => this.reconnect(), 5000);
       });
       
       console.log('✅ Connected to RabbitMQ');
@@ -95,20 +95,14 @@ export class RabbitMQClient {
 
       try {
         await this.channel.assertQueue(queueName, { 
-          durable: true,
-          arguments: {
-            'x-dead-letter-exchange': `${this.exchange}_dlx`
-          }
+          durable: true
         });
       } catch (assertError: any) {
         if (assertError.code === 406) {
-          console.warn(`⚠️ Queue ${queueName} exists with different arguments. Using alternative queue name.`);
-          queueName = `${queue}-v5`;
+          console.warn(`⚠️ Queue ${queueName} exists with different arguments.`);
+          queueName = `${queue}-v2`;
           await this.channel.assertQueue(queueName, { 
-            durable: true,
-            arguments: {
-              'x-dead-letter-exchange': `${this.exchange}_dlx`
-            }
+            durable: true
           });
         } else {
           throw assertError;
@@ -119,7 +113,7 @@ export class RabbitMQClient {
       
       await this.channel.consume(
         queueName, 
-        async (msg: ConsumeMessage | null) => {
+        async (msg: any) => {
           if (!msg) return;
           
           try {
@@ -167,10 +161,10 @@ export class RabbitMQClient {
         { noAck: false }
       );
       
-      console.log(`👂 Listening to: ${routingKey} (queue: ${queueName})`);
+      console.log(`👂 Listening to: ${routingKey}`);
       
     } catch (error) {
-      console.error(`❌ Error setting up consumer for ${queue}:`, error);
+      console.error(`❌ Error setting up consumer:`, error);
       throw error;
     }
   }
@@ -191,15 +185,6 @@ export class RabbitMQClient {
   }
 
   isConnected(): boolean {
-    try {
-      return (
-        this.connection !== null && 
-        this.channel !== null &&
-        // @ts-ignore
-        !this.connection.connection.closed
-      );
-    } catch {
-      return false;
-    }
+    return this.connection !== null && this.channel !== null;
   }
 }

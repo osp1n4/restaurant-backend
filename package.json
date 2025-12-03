@@ -25,11 +25,19 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/express": "^5.0.5",
+    "@types/mongoose": "^5.11.96",
     "axios": "^1.13.2",
     "express": "^5.1.0",
     "firebase-admin": "^13.6.0"
   },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "mongoose": "^9.0.0",
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/jest": "^30.0.0"
   }
 }

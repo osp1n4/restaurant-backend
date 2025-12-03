@@ -20,6 +20,16 @@ export const orderService = {
   getOrderStatus: (orderId: string) => 
     orderServiceClient.get(`/orders/${orderId}/status`),
   getAllOrders: () => orderServiceClient.get<Order[]>('/orders'),
+  /**
+   * Cancela un pedido existente
+   */
+  cancelOrder: (orderId: string, reason?: string, cancelledBy?: string) => 
+    orderServiceClient.post(`/orders/${orderId}/cancel`, { reason, cancelledBy }),
+  /**
+   * Obtiene historial de cancelación de un pedido
+   */
+  getOrderCancellation: (orderId: string) => 
+    orderServiceClient.get(`/orders/${orderId}/cancellation`),
 };
 
 export const kitchenService = {

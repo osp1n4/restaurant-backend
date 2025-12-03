@@ -11,10 +11,12 @@ export interface IKitchenOrder extends Document {
     quantity: number;
     price?: number;
   }>;
-  status: 'RECEIVED' | 'PREPARING' | 'READY';
+  status: 'RECEIVED' | 'PREPARING' | 'READY' | 'CANCELLED';
   receivedAt: Date;
   preparingAt?: Date;
   readyAt?: Date;
+  cancelledAt?: Date;
+  cancellationReason?: string;
   estimatedTime?: number; // en minutos
   notes?: string;
   createdAt: Date;
@@ -43,9 +45,9 @@ const KitchenOrderSchema = new Schema({
     quantity: { type: Number, required: true },
     price: Number
   }],
-  status: {
-    type: String,
-    enum: ['RECEIVED', 'PREPARING', 'READY'],
+  status: { 
+    type: String, 
+    enum: ['RECEIVED', 'PREPARING', 'READY', 'CANCELLED'],
     default: 'RECEIVED',
     index: true
   },
@@ -55,6 +57,8 @@ const KitchenOrderSchema = new Schema({
   },
   preparingAt: Date,
   readyAt: Date,
+  cancelledAt: Date,
+  cancellationReason: String,
   estimatedTime: Number,
   notes: String
 }, {
