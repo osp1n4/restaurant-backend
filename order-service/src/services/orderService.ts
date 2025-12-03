@@ -1,8 +1,15 @@
 import { Order, IOrder, OrderStatus, OrderItem } from '../models/Order';
 import { OrderCancellation } from '../models/OrderCancellation';
-import { rabbitMQClient } from '../rabbitmq/rabbitmqClient';
+import { IEventPublisher } from '../interfaces/IEventPublisher';
 
 export class OrderService {
+  /**
+   * Constructor con Dependency Injection
+   * Principio SOLID: Dependency Inversion Principle (DIP)
+   *
+   * @param eventPublisher - Abstracción para publicar eventos (no implementación concreta)
+   */
+  constructor(private readonly eventPublisher: IEventPublisher) {}
   /**
    * Crea un nuevo pedido
    * @param customerName - Nombre del cliente
@@ -57,7 +64,7 @@ export class OrderService {
         }
       };
 
-      await rabbitMQClient.publishEvent('order.created', eventData);
+      await this.eventPublisher.publishEvent('order.created', eventData);
 
       console.log(`✅ Pedido creado: ${savedOrder.orderNumber}`);
 
@@ -152,7 +159,7 @@ export class OrderService {
 
       if (order) {
         // Publicar evento de actualización
-        await rabbitMQClient.publishEvent('order.updated', {
+        await this.eventPublisher.publishEvent('order.updated', {
           orderId: order._id.toString(),
           orderNumber: order.orderNumber,
           status: order.status,
@@ -207,7 +214,7 @@ export class OrderService {
 
       // Validar que solo se puede cancelar si está en estado PENDING o RECEIVED
       const cancellableStatuses = [OrderStatus.PENDING, 'received']; // 'received' es desde Kitchen Service
-      
+
       if (!cancellableStatuses.includes(order.status as any)) {
         throw new Error(
           `No se puede cancelar un pedido en estado "${order.status}". ` +
@@ -253,7 +260,7 @@ export class OrderService {
         }
       };
 
-      await rabbitMQClient.publishEvent('order.cancelled', eventData);
+      await this.eventPublisher.publishEvent('order.cancelled', eventData);
       console.log(`📤 Evento publicado: order.cancelled para ${cancelledOrder.orderNumber}`);
 
       return cancelledOrder;
@@ -304,5 +311,9 @@ export class OrderService {
   }
 }
 
-// Instancia singleton del servicio
-export const orderService = new OrderService();
+// Instancia singleton del servicio con Dependency Injection
+import { rabbitMQClient } from '../rabbitmq/rabbitmqClient';
+import { RabbitMQEventPublisher } from '../adapters/RabbitMQEventPublisher';
+
+const eventPublisher = new RabbitMQEventPublisher(rabbitMQClient);
+export const orderService = new OrderService(eventPublisher);
