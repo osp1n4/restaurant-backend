@@ -45,14 +45,14 @@ export class ReviewRepository implements IReviewRepository {
   /**
    * Crea una nueva reseña en la base de datos
    * @param reviewData - Datos de la reseña
-   * @returns Reseña creada con estado "approved" por defecto (auto-aprobación)
+   * @returns Reseña creada con estado "pending" (requiere aprobación manual)
    * @throws Error si el orderId ya tiene una reseña o si fallan validaciones
    */
   async create(reviewData: CreateReviewDTO): Promise<IReview> {
     try {
       const review = new Review({
         ...reviewData,
-        status: 'approved' // Auto-aprobación: reviews visibles inmediatamente
+        status: 'pending' // Reviews requieren aprobación del administrador antes de ser visibles
       });
 
       await review.save();
