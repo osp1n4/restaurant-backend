@@ -129,7 +129,7 @@ export class OrderService {
    */
   async getOrderStatus(orderId: string): Promise<{ status: OrderStatus; orderNumber: string } | null> {
     try {
-      const order = await Order.findById(orderId).select('status orderNumber');
+      const order = await this.getOrderById(orderId);
       if (!order) {
         return null;
       }
@@ -151,21 +151,23 @@ export class OrderService {
    */
   async updateOrderStatus(orderId: string, status: OrderStatus): Promise<IOrder | null> {
     try {
-      const order = await Order.findByIdAndUpdate(
-        orderId,
-        { status, updatedAt: new Date() },
-        { new: true }
-      );
-
-      if (order) {
-        // Publicar evento de actualización
-        await this.eventPublisher.publishEvent('order.updated', {
-          orderId: order._id.toString(),
-          orderNumber: order.orderNumber,
-          status: order.status,
-          updatedAt: order.updatedAt
-        });
+      const order = await this.getOrderById(orderId);
+      
+      if (!order) {
+        return null;
       }
+
+      order.status = status;
+      order.updatedAt = new Date();
+      await order.save();
+
+      // Publicar evento de actualización
+      await this.eventPublisher.publishEvent('order.updated', {
+        orderId: order._id.toString(),
+        orderNumber: order.orderNumber,
+        status: order.status,
+        updatedAt: order.updatedAt
+      });
 
       return order;
     } catch (error) {
@@ -206,7 +208,7 @@ export class OrderService {
     cancelledBy: 'customer' | 'admin' = 'customer'
   ): Promise<IOrder> {
     try {
-      const order = await Order.findById(orderId);
+      const order = await this.getOrderById(orderId);
 
       if (!order) {
         throw new Error(`Pedido ${orderId} no encontrado`);
