@@ -11,26 +11,31 @@ export class OrderController {
     try {
       const { customerName, customerEmail, items } = req.body;
       if (customerEmail && typeof customerEmail !== 'string') {
-        return ResponseBuilder.badRequest(res, 'El email del cliente debe ser una cadena de texto válida');
+        ResponseBuilder.badRequest(res, 'El email del cliente debe ser una cadena de texto válida');
+        return;
       }
 
 
       // Validaciones
       if (!customerName || typeof customerName !== 'string' || customerName.trim() === '') {
-        return ResponseBuilder.badRequest(res, 'El nombre del cliente es requerido');
+        ResponseBuilder.badRequest(res, 'El nombre del cliente es requerido');
+        return;
       }
 
       if (!items || !Array.isArray(items) || items.length === 0) {
-        return ResponseBuilder.badRequest(res, 'El pedido debe tener al menos un item');
+        ResponseBuilder.badRequest(res, 'El pedido debe tener al menos un item');
+        return;
       }
 
       // Validar items
       for (const item of items) {
         if (!item.name || !item.quantity || !item.price) {
-          return ResponseBuilder.badRequest(res, 'Cada item debe tener name, quantity y price');
+          ResponseBuilder.badRequest(res, 'Cada item debe tener name, quantity y price');
+          return;
         }
         if (item.quantity < 1 || item.price < 0) {
-          return ResponseBuilder.badRequest(res, 'Quantity debe ser mayor a 0 y price debe ser mayor o igual a 0');
+          ResponseBuilder.badRequest(res, 'Quantity debe ser mayor a 0 y price debe ser mayor o igual a 0');
+          return;
         }
       }
 
@@ -40,7 +45,7 @@ export class OrderController {
         typeof customerEmail === 'string' ? customerEmail.trim() : undefined
       );
 
-      return ResponseBuilder.created(res, 'Pedido creado exitosamente', {
+      ResponseBuilder.created(res, 'Pedido creado exitosamente', {
         order: {
           id: order._id,
           orderNumber: order.orderNumber,
@@ -53,7 +58,7 @@ export class OrderController {
       });
     } catch (error: any) {
       console.error('Error en createOrder:', error);
-      return ResponseBuilder.serverError(res, 'Error al crear el pedido', error.message);
+      ResponseBuilder.serverError(res, 'Error al crear el pedido', error.message);
     }
   }
 
@@ -67,10 +72,11 @@ export class OrderController {
       const order = await orderService.getOrderById(id);
 
       if (!order) {
-        return ResponseBuilder.notFound(res, 'Pedido no encontrado');
+        ResponseBuilder.notFound(res, 'Pedido no encontrado');
+        return;
       }
 
-      return ResponseBuilder.ok(res, {
+      ResponseBuilder.ok(res, {
         order: {
           id: order._id,
           orderNumber: order.orderNumber,
@@ -84,7 +90,7 @@ export class OrderController {
       });
     } catch (error: any) {
       console.error('Error en getOrderById:', error);
-      return ResponseBuilder.serverError(res, 'Error al obtener el pedido', error.message);
+      ResponseBuilder.serverError(res, 'Error al obtener el pedido', error.message);
     }
   }
 
@@ -98,16 +104,17 @@ export class OrderController {
       const orderStatus = await orderService.getOrderStatus(id);
 
       if (!orderStatus) {
-        return ResponseBuilder.notFound(res, 'Pedido no encontrado');
+        ResponseBuilder.notFound(res, 'Pedido no encontrado');
+        return;
       }
 
-      return ResponseBuilder.ok(res, {
+      ResponseBuilder.ok(res, {
         orderNumber: orderStatus.orderNumber,
         status: orderStatus.status
       });
     } catch (error: any) {
       console.error('Error en getOrderStatus:', error);
-      return ResponseBuilder.serverError(res, 'Error al consultar el estado del pedido', error.message);
+      ResponseBuilder.serverError(res, 'Error al consultar el estado del pedido', error.message);
     }
   }
 
@@ -121,7 +128,7 @@ export class OrderController {
 
       const orders = await orderService.getAllOrders(limit, skip);
 
-      return ResponseBuilder.ok(res, {
+      ResponseBuilder.ok(res, {
         count: orders.length,
         orders: orders.map(order => ({
           id: order._id,
@@ -136,7 +143,7 @@ export class OrderController {
       });
     } catch (error: any) {
       console.error('Error en getAllOrders:', error);
-      return ResponseBuilder.serverError(res, 'Error al obtener los pedidos', error.message);
+      ResponseBuilder.serverError(res, 'Error al obtener los pedidos', error.message);
     }
   }
 
@@ -150,12 +157,14 @@ export class OrderController {
 
       // Validaciones
       if (!id) {
-        return ResponseBuilder.badRequest(res, 'El ID del pedido es requerido');
+        ResponseBuilder.badRequest(res, 'El ID del pedido es requerido');
+        return;
       }
 
       const cancelledByValue = cancelledBy || 'customer';
       if (!['customer', 'admin'].includes(cancelledByValue)) {
-        return ResponseBuilder.badRequest(res, 'cancelledBy debe ser "customer" o "admin"');
+        ResponseBuilder.badRequest(res, 'cancelledBy debe ser "customer" o "admin"');
+        return;
       }
 
       // Cancelar el pedido
@@ -165,7 +174,7 @@ export class OrderController {
         cancelledByValue
       );
 
-      return ResponseBuilder.success(res, 200, 'Pedido cancelado exitosamente', {
+      ResponseBuilder.success(res, 200, 'Pedido cancelado exitosamente', {
         order: {
           id: order._id,
           orderNumber: order.orderNumber,
@@ -182,15 +191,17 @@ export class OrderController {
 
       // Validar si es error por estado inválido
       if (error.message.includes('No se puede cancelar')) {
-        return ResponseBuilder.badRequest(res, error.message);
+        ResponseBuilder.badRequest(res, error.message);
+        return;
       }
 
       // Validar si el pedido no existe
       if (error.message.includes('no encontrado')) {
-        return ResponseBuilder.notFound(res, error.message);
+        ResponseBuilder.notFound(res, error.message);
+        return;
       }
 
-      return ResponseBuilder.serverError(res, 'Error al cancelar el pedido', error.message);
+      ResponseBuilder.serverError(res, 'Error al cancelar el pedido', error.message);
     }
   }
 
@@ -204,10 +215,11 @@ export class OrderController {
       const cancellation = await orderService.getOrderCancellationHistory(id);
 
       if (!cancellation) {
-        return ResponseBuilder.notFound(res, 'No hay registro de cancelación para este pedido');
+        ResponseBuilder.notFound(res, 'No hay registro de cancelación para este pedido');
+        return;
       }
 
-      return ResponseBuilder.ok(res, {
+      ResponseBuilder.ok(res, {
         cancellation: {
           orderId: cancellation.orderId,
           orderNumber: cancellation.orderNumber,
@@ -219,7 +231,7 @@ export class OrderController {
       });
     } catch (error: any) {
       console.error('❌ Error en getOrderCancellation:', error);
-      return ResponseBuilder.serverError(res, 'Error al obtener historial de cancelación', error.message);
+      ResponseBuilder.serverError(res, 'Error al obtener historial de cancelación', error.message);
     }
   }
 }

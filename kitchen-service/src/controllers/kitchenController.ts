@@ -9,7 +9,7 @@ export class KitchenController {
    * POST /orders/:orderId/start-preparing
    * Endpoint 5: Cocinero inicia preparación
    */
-  startPreparing = async (req: Request, res: Response): Promise<void> => {
+  startPreparing = async (req: Request, res: Response): Promise<Response> => {
     try {
       const { orderId } = req.params;
 
@@ -46,7 +46,7 @@ export class KitchenController {
    * POST /orders/:orderId/ready
    * Endpoint 8: Cocinero marca como listo
    */
-  markAsReady = async (req: Request, res: Response): Promise<void> => {
+  markAsReady = async (req: Request, res: Response): Promise<Response> => {
     try {
       const { orderId } = req.params;
 
@@ -84,7 +84,7 @@ export class KitchenController {
    * GET /orders
    * Obtiene todos los pedidos en cocina (con filtro opcional por status)
    */
-  getAllOrders = async (req: Request, res: Response): Promise<void> => {
+  getAllOrders = async (req: Request, res: Response): Promise<Response> => {
     try {
       const { status } = req.query;
 
@@ -106,7 +106,7 @@ export class KitchenController {
    * GET /orders/:orderId
    * Obtiene un pedido específico
    */
-  getOrderById = async (req: Request, res: Response): Promise<void> => {
+  getOrderById = async (req: Request, res: Response): Promise<Response> => {
     try {
       const { orderId } = req.params;
 
