@@ -39,7 +39,7 @@ export class AnalyticsRepository implements IAnalyticsRepository {
 
     // Pipeline para series temporales
     const seriesPipeline: any[] = [
-      { $match: { createdAt: { $gte: fromDate, $lte: toDate } } },
+      { $match: { createdAt: { $gte: fromDate, $lte: toDate }, status: 'ready' } },
       { $unwind: '$items' },
       {
         $addFields: {
@@ -72,7 +72,7 @@ export class AnalyticsRepository implements IAnalyticsRepository {
 
     // Pipeline para productos vendidos
     const productsPipeline: any[] = [
-      { $match: { createdAt: { $gte: fromDate, $lte: toDate } } },
+      { $match: { createdAt: { $gte: fromDate, $lte: toDate }, status: 'ready' } },
       { $unwind: '$items' },
       {
         $group: {

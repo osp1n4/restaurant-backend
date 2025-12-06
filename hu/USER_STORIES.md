@@ -73,25 +73,25 @@
 
 # HU-5: Visualización de métricas clave por rango de fechas
 
-**Como** Manager o Administrador de la plataforma
+**Como** Administrador de la página delicious kitchen
 **Quiero** visualizar métricas clave del negocio filtradas por un rango de fechas específico
 **Para** analizar el rendimiento de ventas, ingresos y productos durante un periodo particular y tomar decisiones informadas
 
 ## Criterios de Aceptación
 
-**Dado** que el usuario está autenticado como “manager” o “admin” y existen datos en el rango de fechas seleccionado
-**Cuando** consultar el rendimiento del negocio dentro de un periodo definido
-**Entonces** al acceder al Dashboard de Analíticas (/admin/analytics) y seleccionar un rango (ej. 2025-11-01 al 2025-11-30), el sistema muestra:
+**Dado** que el usuario está autenticado como “administrador” 
+**Y** existen datos en el rango de fechas seleccionado
+**Cuando** consultar el rendimiento del negocio dentro de un periodo definido selecciona un rango de fecha (ej. 2025-11-01 al 2025-11-30)
+**Entonces**  , el sistema muestra: 
 
-totalOrders
+total Orders
 
-totalRevenue
+total Revenue
 
-productsSold (por producto)
+products Sold (por producto)
 
-topNProducts
+top N Products
 
-avgPrepTime
 presentados en gráficos (línea, barra) y una tabla paginada.
 
 ------------------------------------------------------------------------------------------------------------------------------
