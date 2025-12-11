@@ -304,10 +304,38 @@ Ver documentación completa en [ENDPOINTS_POSTMAN.md](./ENDPOINTS_POSTMAN.md)
 
 ### ✅ Sistema de Reseñas (Nuevo) ⭐
 - **Creación de Reseñas**
-  - Validación de campos requeridos
-  - Ratings (1-5 estrellas): Overall y Food
-  - Comentarios opcionales (máx 500 caracteres)
-  - Una reseña por pedido
+   - Validación de campos requeridos
+   - Ratings (1-5 estrellas): Overall y Food
+   - Comentarios opcionales (máx 500 caracteres)
+   - Una reseña por pedido
+
+### ✅ Gestión de Roles de Usuario
+- Roles soportados: Administrador, Chef, Cliente
+- Acceso diferenciado a endpoints y vistas según el rol
+- El administrador puede moderar reseñas y acceder a analíticas
+- El chef accede a la vista de cocina y actualiza estados de pedidos
+- El cliente puede crear pedidos y dejar reseñas
+
+**¿Cómo acceder?**
+- El rol se define al autenticarse o seleccionar el tipo de usuario en el frontend.
+- Los endpoints protegidos requieren el rol adecuado (ver documentación de endpoints y frontend).
+- http://localhost:5173/login
+- usuario nevardo.ospina@sofka.com.co 
+- contraseña -> Sofka2025
+
+### ✅ Dashboard Analítico
+- Visualización de métricas de ventas y pedidos en tiempo real
+- Filtros por rango de fechas y estado de pedido
+- Gráficas de barras y líneas, tabla de datos y tarjetas de estadísticas
+- Solo accesible para el rol Administrador
+
+**¿Cómo acceder?**
+- Ingresar al frontend (http://localhost:5173/login) y autenticarse como Administrador
+- usuario nevardo.ospina@sofka.com.co 
+- contraseña -> Sofka2025
+
+
+  
 
 - **Moderación de Contenido**
   - Estados: PENDING → APPROVED/REJECTED

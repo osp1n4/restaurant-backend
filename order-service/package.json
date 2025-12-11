@@ -11,6 +11,8 @@
     "test:watch": "jest --watch",
     "test:unit": "jest --testPathPattern=unit --coverage --coverageDirectory=coverage",
     "test:unit:report": "jest --testPathPattern=unit --coverage --coverageDirectory=coverage && echo Reporte generado en coverage/lcov-report/index.html",
+    "test:integration": "jest --testPathPattern=integration",
+    "test:integration:report": "jest --testPathPattern=integration --coverage --coverageDirectory=coverage-integration && echo Reporte generado en coverage-integration/lcov-report/index.html",
     "lint": "eslint src/**/*.ts"
   },
   "keywords": [],
