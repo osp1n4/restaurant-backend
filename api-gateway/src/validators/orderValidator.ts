@@ -9,6 +9,7 @@ export class OrderValidator {
   /**
    * Valida los datos para crear un nuevo pedido
    */
+  // eslint-disable-next-line complexity
   static validateCreateOrder(req: Request): { valid: boolean; message?: string } {
     if (Validators.isEmpty(req.body)) {
       return { valid: false, message: 'El cuerpo de la petición está vacío' };

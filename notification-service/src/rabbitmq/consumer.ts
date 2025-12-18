@@ -27,8 +27,10 @@ class RabbitMQConsumer {
       // Binding: escuchar todos los eventos
       await this.bindQueue('order.created');
       await this.bindQueue('order.received');
+      await this.bindQueue('order.updated');
       await this.bindQueue('order.preparing');
       await this.bindQueue('order.ready');
+      await this.bindQueue('order.cancelled');
 
       // Consumir mensajes
       await this.consumeMessages();
@@ -120,12 +122,15 @@ class RabbitMQConsumer {
   }
 
   // Procesar mensaje recibido
+  // eslint-disable-next-line complexity
   private handleMessage(content: string): void {
     try {
       const rawEvent = JSON.parse(content);
+      console.log('🔍 Raw event received:', JSON.stringify(rawEvent, null, 2));
       let event: OrderEvent | null = null;
 
       if (rawEvent.type && rawEvent.orderId) {
+        console.log(`✅ Event has explicit type: ${rawEvent.type}`);
         event = {
           type: rawEvent.type as OrderEvent['type'],
           orderId: rawEvent.orderId,
@@ -133,6 +138,7 @@ class RabbitMQConsumer {
           data: rawEvent.data || rawEvent
         };
       } else if (rawEvent.orderId) {
+        console.log('⚠️ Event missing type, inferring...');
         let inferredType: OrderEvent['type'] = 'order.created';
         if (rawEvent.status === 'READY' || rawEvent.readyAt) {
           inferredType = 'order.ready';

@@ -7,4 +7,5 @@ coverage/
 *.swp
 *.swo
 *~
+firebase-admin-api/serviceAccountKey.json
 

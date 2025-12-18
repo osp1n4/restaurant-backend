@@ -69,6 +69,30 @@ npm run dev
 3. **Order Service Health**: http://localhost:3001/health
 4. **Kitchen Service Health**: http://localhost:3002/health
 
+## 🔐 Admin API (Firebase Admin)
+
+Si vas a utilizar el servicio `firebase-admin-api` (creado para asignar roles y listar usuarios), sigue estos pasos:
+
+- Coloca el JSON de la service account de Firebase en la carpeta `restaurant-backend/secrets` con el nombre `service-account.json`.
+- Define una variable de entorno `ADMIN_API_KEY` para proteger el endpoint (valor de ejemplo: `changeme`).
+
+Ejemplo usando Docker Compose (desde `restaurant-backend`):
+
+```bash
+# crear carpeta de secretos y copiar el archivo JSON allí
+mkdir -p secrets
+# Copia tu archivo de credenciales a restaurant-backend/secrets/service-account.json
+
+# En PowerShell (Windows) exporta el API key temporalmente antes de levantar compose:
+$Env:ADMIN_API_KEY = "mi-api-key-segura"
+
+docker-compose up --build
+```
+
+Notas:
+- En este setup el archivo de credenciales se monta como volumen en el contenedor en `/secrets/service-account.json`.
+- Cambia `ADMIN_API_KEY` por una clave segura; en producción usa mecanismos de autenticación más robustos.
+
 ## 📝 Próximos Pasos
 
 Una vez que la estructura esté lista, implementar:

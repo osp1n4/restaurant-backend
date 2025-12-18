@@ -3,6 +3,11 @@ import cors from 'cors';
 import axios from 'axios';
 import orderRoutes from './routes/orderRoutes';
 import kitchenRoutes from './routes/kitchenRoutes';
+import reviewRoutes from './routes/reviewRoutes';
+import analyticsRoutes from './routes/analyticsRoutes';
+import adminRoutes from './routes/adminRoutes';
+import menuRoutes from './routes/menuRoutes';
+import notificationRoutes from './routes/notificationRoutes';
 import { config, validateConfig } from './config';
 
 // Validar configuración al iniciar
@@ -27,6 +32,11 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use('/orders', orderRoutes);
 app.use('/kitchen', kitchenRoutes);
+app.use('/reviews', reviewRoutes);
+app.use('/menu', menuRoutes);
+app.use('/notifications', notificationRoutes);
+app.use('/', analyticsRoutes); // Debe ir ANTES de /admin para que /admin/analytics/* funcione
+app.use('/admin', adminRoutes);
 
 app.get('/health', async (req: Request, res: Response) => {
   const healthStatus = {

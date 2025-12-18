@@ -2,6 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IKitchenOrder extends Document {
   orderId: string;
+  orderNumber?: string;
   userId: string;
   customerName?: string;
   customerEmail?: string;
@@ -10,10 +11,11 @@ export interface IKitchenOrder extends Document {
     quantity: number;
     price?: number;
   }>;
-  status: 'RECEIVED' | 'PREPARING' | 'READY';
+  status: 'RECEIVED' | 'PREPARING' | 'READY' | 'CANCELLED';
   receivedAt: Date;
   preparingAt?: Date;
   readyAt?: Date;
+  cancelledAt?: Date;
   estimatedTime?: number; // en minutos
   notes?: string;
   createdAt: Date;
@@ -26,6 +28,10 @@ const KitchenOrderSchema = new Schema({
     required: true, 
     unique: true,
     index: true 
+  },
+  orderNumber: {
+    type: String,
+    index: true
   },
   userId: { 
     type: String, 
@@ -40,7 +46,7 @@ const KitchenOrderSchema = new Schema({
   }],
   status: { 
     type: String, 
-    enum: ['RECEIVED', 'PREPARING', 'READY'],
+    enum: ['RECEIVED', 'PREPARING', 'READY', 'CANCELLED'],
     default: 'RECEIVED',
     index: true
   },
@@ -50,6 +56,7 @@ const KitchenOrderSchema = new Schema({
   },
   preparingAt: Date,
   readyAt: Date,
+  cancelledAt: Date,
   estimatedTime: Number,
   notes: String
 }, { 

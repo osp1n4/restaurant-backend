@@ -42,15 +42,19 @@ class NotificationService {
     const messages: Record<OrderEvent['type'], string> = {
       'order.created': `Pedido #${event.orderId} recibido correctamente`,
       'order.received': `Pedido #${event.orderId} recibido en cocina`,
+      'order.updated': `Pedido #${event.orderId} ha sido actualizado`,
       'order.preparing': `Tu pedido #${event.orderId} está siendo preparado`,
-      'order.ready': `¡Tu pedido #${event.orderId} está listo para recoger!`
+      'order.ready': `¡Tu pedido #${event.orderId} está listo para recoger!`,
+      'order.cancelled': `Tu pedido #${event.orderId} ha sido cancelado`
     };
 
     const types: Record<OrderEvent['type'], Notification['type']> = {
       'order.created': 'info',
       'order.received': 'info',
+      'order.updated': 'info',
       'order.preparing': 'warning',
-      'order.ready': 'success'
+      'order.ready': 'success',
+      'order.cancelled': 'error'
     };
 
     return {

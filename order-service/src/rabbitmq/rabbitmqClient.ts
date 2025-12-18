@@ -1,10 +1,12 @@
-import { connect, Connection, Channel } from 'amqplib';
+import { connect, Channel } from 'amqplib';
 
 export class RabbitMQClient {
   private connection: Awaited<ReturnType<typeof connect>> | null = null;
   private channel: Channel | null = null;
-  private readonly url: string;
+  private url: string;
   private readonly exchangeName: string = 'restaurant_orders';
+  private readonly MAX_RETRIES = 5;
+  private reconnectTimeout: NodeJS.Timeout | null = null;
 
   constructor(url?: string) {
     this.url = url || process.env.RABBITMQ_URL || 'amqp://localhost:5672';
@@ -18,17 +20,35 @@ export class RabbitMQClient {
       console.log('🔄 Conectando a RabbitMQ...');
       this.connection = await connect(this.url);
       this.channel = await this.connection.createChannel();
-      
+
       // Crear exchange de tipo topic para eventos de pedidos
       await this.channel.assertExchange(this.exchangeName, 'topic', {
         durable: true
       });
 
+      this.connection.on('error', (err: Error) => {
+        console.error('❌ RabbitMQ connection error:', err);
+      });
+
+      this.connection.on('close', () => {
+        console.log('⚠️ RabbitMQ connection closed. Reconnecting...');
+        this.reconnect();
+      });
+
       console.log('✅ Conectado a RabbitMQ exitosamente');
     } catch (error) {
       console.error('❌ Error conectando a RabbitMQ:', error);
-      throw error;
+      this.reconnect();
     }
+  }
+
+  private reconnect(): void {
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+    }
+    this.reconnectTimeout = setTimeout(() => {
+      this.connect();
+    }, 5000);
   }
 
   /**

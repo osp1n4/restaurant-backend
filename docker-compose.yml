@@ -12,6 +12,22 @@ services:
       timeout: 5s
       retries: 5
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"   # Puerto AMQP
+      - "15672:15672" # Puerto Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
   api-gateway:
     build: ./api-gateway
     ports:
@@ -20,9 +36,11 @@ services:
       NODE_ENV: development
       ORDER_SERVICE_URL: http://order-service:3001
       KITCHEN_SERVICE_URL: http://kitchen-service:3002
+      REVIEW_SERVICE_URL: http://review-service:3004
     depends_on:
       - order-service
       - kitchen-service
+      - review-service
     restart: unless-stopped
 
   order-service:
@@ -32,10 +50,11 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3001
-      RABBITMQ_URL: ${RABBITMQ_URL} 
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
       MONGODB_URL: mongodb://mongodb:27017/orders
     depends_on:
       - mongodb
+      - rabbitmq
     restart: unless-stopped
 
   kitchen-service:
@@ -45,10 +64,11 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3002
-      RABBITMQ_URL: ${RABBITMQ_URL} 
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
       MONGODB_URL: mongodb://mongodb:27017/kitchen
     depends_on:
       - mongodb
+      - rabbitmq
     restart: unless-stopped
 
   notification-service:
@@ -58,8 +78,38 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3003
-      RABBITMQ_URL: ${RABBITMQ_URL}
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+    depends_on:
+      - rabbitmq
+    restart: unless-stopped
+
+  review-service:
+    build: ./review-service
+    ports:
+      - "3004:3004"
+    environment:
+      NODE_ENV: development
+      PORT: 3004
+      MONGODB_URI: mongodb://mongodb:27017/restaurant
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+
+  firebase-admin-api:
+    build: ./firebase-admin-api
+    ports:
+      - "4001:4001"
+    environment:
+      NODE_ENV: development
+      PORT: 4001
+      API_KEY: ${ADMIN_API_KEY:-changeme}
+      GOOGLE_APPLICATION_CREDENTIALS: /secrets/serviceAccountKey.json
+    volumes:
+      - ./firebase-admin-api/serviceAccountKey.json:/secrets/serviceAccountKey.json:ro
+    depends_on:
+      - mongodb
     restart: unless-stopped
 
 volumes:
   mongodb_data:
+  rabbitmq_data:

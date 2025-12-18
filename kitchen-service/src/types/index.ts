@@ -47,6 +47,21 @@ export interface OrderReceivedEvent {
 }
 
 /**
+ * Evento order.cancelled recibido del order-service
+ */
+export interface OrderCancelledEvent {
+  orderId: string;
+  orderNumber: string;
+  customerName?: string;
+  customerEmail?: string;
+  status: 'CANCELLED';
+  timestamp: string;
+  data?: {
+    cancelledAt: string;
+  };
+}
+
+/**
  * Evento order.preparing publicado para notification-service (paso 6)
  */
 export interface OrderPreparingEvent {

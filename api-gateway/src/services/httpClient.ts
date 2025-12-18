@@ -20,6 +20,10 @@ export const orderService = {
   getOrderStatus: (orderId: string) => 
     orderServiceClient.get(`/orders/${orderId}/status`),
   getAllOrders: () => orderServiceClient.get<Order[]>('/orders'),
+  updateOrder: (orderId: string, updateData: Partial<CreateOrderRequest>) => 
+    orderServiceClient.put<Order>(`/orders/${orderId}`, updateData),
+  cancelOrder: (orderId: string) => 
+    orderServiceClient.post(`/orders/${orderId}/cancel`),
 };
 
 export const kitchenService = {

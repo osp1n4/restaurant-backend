@@ -7,12 +7,14 @@ export class OrderService {
    * @param customerName - Nombre del cliente
    * @param items - Items del pedido
    * @param customerEmail - Email del cliente (opcional)
+   * @param notes - Notas del pedido (opcional)
    * @returns El pedido creado
    */
   async createOrder(
     customerName: string,
     items: OrderItem[],
-    customerEmail?: string
+    customerEmail?: string,
+    notes?: string
   ): Promise<IOrder> {
     try {
       // Generar número de pedido único
@@ -22,7 +24,9 @@ export class OrderService {
       const order = new Order({
         orderNumber,
         customerName,
+        customerEmail,
         items,
+        notes,
         status: OrderStatus.PENDING
       });
 
@@ -45,6 +49,7 @@ export class OrderService {
           quantity: item.quantity,
           price: item.price
         })),
+        notes: savedOrder.notes,
         totalAmount: savedOrder.total,
         status: savedOrder.status,
         timestamp: new Date().toISOString(),
@@ -55,7 +60,13 @@ export class OrderService {
         }
       };
 
-      await rabbitMQClient.publishEvent('order.created', eventData);
+      // Intentar publicar evento, pero no fallar si RabbitMQ no está disponible
+      try {
+        await rabbitMQClient.publishEvent('order.created', eventData);
+        console.log(`📤 Evento order.created publicado`);
+      } catch (mqError) {
+        console.warn(`⚠️ No se pudo publicar evento a RabbitMQ (el pedido se creó correctamente):`, mqError instanceof Error ? mqError.message : mqError);
+      }
 
       console.log(`✅ Pedido creado: ${savedOrder.orderNumber}`);
 
@@ -118,6 +129,94 @@ export class OrderService {
   }
 
   /**
+   * Actualiza un pedido (items, notas, email)
+   * Solo se puede actualizar si el pedido está en estado PENDING
+   * @param orderId - ID del pedido
+   * @param updateData - Datos a actualizar
+   * @returns El pedido actualizado
+   */
+  async updateOrder(orderId: string, updateData: {
+    items?: OrderItem[],
+    notes?: string,
+    customerEmail?: string
+  }): Promise<IOrder | null> {
+    try {
+      // Buscar el pedido actual por orderNumber o por _id
+      let currentOrder = null;
+      if (orderId.startsWith('ORD-')) {
+        currentOrder = await Order.findOne({ orderNumber: orderId });
+      } else if (/^[a-fA-F0-9]{24}$/.test(orderId)) {
+        currentOrder = await Order.findById(orderId);
+      }
+
+      if (!currentOrder) {
+        return null;
+      }
+
+      // Validar que el pedido esté en estado PENDING
+      if (currentOrder.status !== OrderStatus.PENDING) {
+        throw new Error(`El pedido no se puede modificar porque ya está en estado ${currentOrder.status}`);
+      }
+
+      // Preparar datos de actualización
+      const updates: any = { updatedAt: new Date() };
+      
+      if (updateData.items) {
+        updates.items = updateData.items;
+        // Recalcular total
+        updates.total = updateData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      }
+      
+      if (updateData.notes !== undefined) {
+        updates.notes = updateData.notes;
+      }
+      
+      if (updateData.customerEmail) {
+        updates.customerEmail = updateData.customerEmail;
+      }
+
+      // Actualizar en MongoDB usando el _id
+      const updatedOrder = await Order.findByIdAndUpdate(
+        currentOrder._id,
+        updates,
+        { new: true }
+      );
+
+      if (updatedOrder) {
+        // Publicar evento order.updated a RabbitMQ
+        try {
+          await rabbitMQClient.publishEvent('order.updated', {
+            type: 'order.updated',
+            orderId: updatedOrder._id.toString(),
+            orderNumber: updatedOrder.orderNumber,
+            customerName: updatedOrder.customerName,
+            customerEmail: updatedOrder.customerEmail,
+            items: updatedOrder.items.map((item) => ({
+              name: item.name,
+              quantity: item.quantity,
+              price: item.price
+            })),
+            notes: updatedOrder.notes,
+            totalAmount: updatedOrder.total,
+            status: updatedOrder.status,
+            timestamp: new Date().toISOString(),
+            updatedAt: updatedOrder.updatedAt.toISOString()
+          });
+          console.log(`📤 Evento order.updated publicado para ${updatedOrder.orderNumber}`);
+        } catch (mqError) {
+          console.warn(`⚠️ No se pudo publicar evento order.updated a RabbitMQ:`, mqError instanceof Error ? mqError.message : mqError);
+        }
+      }
+
+      console.log(`✅ Pedido actualizado: ${updatedOrder?.orderNumber}`);
+      return updatedOrder;
+    } catch (error) {
+      console.error('❌ Error actualizando pedido:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Actualiza el estado de un pedido
    * @param orderId - ID del pedido
    * @param status - Nuevo estado
@@ -125,20 +224,38 @@ export class OrderService {
    */
   async updateOrderStatus(orderId: string, status: OrderStatus): Promise<IOrder | null> {
     try {
+      // Preparar el update con timestamps según el estado
+      const updateData: any = { 
+        status, 
+        updatedAt: new Date() 
+      };
+
+      // Agregar timestamps específicos según el estado (US-031)
+      if (status === OrderStatus.PREPARING) {
+        updateData.preparingStartedAt = new Date();
+      } else if (status === OrderStatus.READY) {
+        updateData.readyAt = new Date();
+      }
+
       const order = await Order.findByIdAndUpdate(
         orderId,
-        { status, updatedAt: new Date() },
+        updateData,
         { new: true }
       );
 
       if (order) {
-        // Publicar evento de actualización
-        await rabbitMQClient.publishEvent('order.updated', {
-          orderId: order._id.toString(),
-          orderNumber: order.orderNumber,
-          status: order.status,
-          updatedAt: order.updatedAt
-        });
+        // Publicar evento de actualización (opcional)
+        try {
+          await rabbitMQClient.publishEvent('order.updated', {
+            type: 'order.updated',
+            orderId: order._id.toString(),
+            orderNumber: order.orderNumber,
+            status: order.status,
+            updatedAt: order.updatedAt
+          });
+        } catch (mqError) {
+          console.warn(`⚠️ No se pudo publicar evento de actualización a RabbitMQ:`, mqError instanceof Error ? mqError.message : mqError);
+        }
       }
 
       return order;
@@ -163,6 +280,69 @@ export class OrderService {
       return orders;
     } catch (error) {
       console.error('❌ Error obteniendo pedidos:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Cancela un pedido
+   * Solo se puede cancelar si el pedido está en estado PENDING
+   * @param orderId - ID o número del pedido
+   * @returns El pedido cancelado
+   */
+  async cancelOrder(orderId: string): Promise<IOrder | null> {
+    try {
+      // Buscar el pedido por orderNumber o por _id
+      let currentOrder = null;
+      if (orderId.startsWith('ORD-')) {
+        currentOrder = await Order.findOne({ orderNumber: orderId });
+      } else if (/^[a-fA-F0-9]{24}$/.test(orderId)) {
+        currentOrder = await Order.findById(orderId);
+      }
+
+      if (!currentOrder) {
+        return null;
+      }
+
+      // Validar que el pedido esté en estado PENDING
+      if (currentOrder.status !== OrderStatus.PENDING) {
+        throw new Error(
+          `El pedido no se puede cancelar porque ya está en estado ${currentOrder.status}`
+        );
+      }
+
+      // Actualizar estado a CANCELLED
+      currentOrder.status = OrderStatus.CANCELLED;
+      currentOrder.updatedAt = new Date();
+      await currentOrder.save();
+
+      console.log(`🚫 Pedido cancelado: ${currentOrder.orderNumber}`);
+
+      // Publicar evento order.cancelled a RabbitMQ
+      try {
+        await rabbitMQClient.publishEvent('order.cancelled', {
+          type: 'order.cancelled',
+          orderId: currentOrder._id.toString(),
+          orderNumber: currentOrder.orderNumber,
+          customerName: currentOrder.customerName,
+          customerEmail: currentOrder.customerEmail,
+          status: 'CANCELLED',
+          timestamp: new Date().toISOString(),
+          data: {
+            cancelledAt: currentOrder.updatedAt
+          }
+        });
+        console.log(`📤 Evento order.cancelled publicado para ${currentOrder.orderNumber}`);
+      } catch (mqError) {
+        console.warn(
+          `⚠️ No se pudo publicar evento order.cancelled a RabbitMQ:`,
+          mqError instanceof Error ? mqError.message : mqError
+        );
+      }
+
+      return currentOrder;
+    } catch (error) {
+      console.error('❌ Error cancelando pedido:', error);
       throw error;
     }
   }

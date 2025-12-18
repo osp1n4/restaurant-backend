@@ -58,3 +58,55 @@ export const getOrderById = async (req: Request, res: Response): Promise<void> =
   }
 };
 
+/**
+ * Controlador para actualizar un pedido
+ * PUT /orders/:id
+ */
+export const updateOrder = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const validation = OrderValidator.validateOrderId(req);
+    if (!validation.valid) {
+      HttpResponse.error(res, validation.message!, 400);
+      return;
+    }
+
+    const orderId = req.params.id;
+    const result = await orderService.updateOrder(orderId, req.body);
+
+    if (result.success) {
+      HttpResponse.success(res, result.data, 'Pedido actualizado exitosamente');
+    } else {
+      HttpResponse.fromServiceResponse(res, result);
+    }
+  } catch (error) {
+    console.error('Error en updateOrder:', error);
+    HttpResponse.error(res, 'Error interno del servidor al actualizar el pedido', 500);
+  }
+};
+
+/**
+ * Controlador para cancelar un pedido
+ * POST /orders/:id/cancel
+ */
+export const cancelOrder = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const validation = OrderValidator.validateOrderId(req);
+    if (!validation.valid) {
+      HttpResponse.error(res, validation.message!, 400);
+      return;
+    }
+
+    const orderId = req.params.id;
+    const result = await orderService.cancelOrder(orderId);
+
+    if (result.success) {
+      HttpResponse.success(res, result.data, 'Pedido cancelado exitosamente');
+    } else {
+      HttpResponse.fromServiceResponse(res, result);
+    }
+  } catch (error) {
+    console.error('Error en cancelOrder:', error);
+    HttpResponse.error(res, 'Error interno del servidor al cancelar el pedido', 500);
+  }
+};
+

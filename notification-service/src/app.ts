@@ -2,6 +2,8 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import notificationService from './services/notificationService';
 import rabbitMQConsumer from './rabbitmq/consumer';
+import { errorHandler, notFoundHandler } from './middleware/errorHandler';
+import { logger } from './utils/logger';
 
 const app = express();
 const PORT = process.env.PORT || 3003;
@@ -40,6 +42,10 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
+// Middleware de manejo de errores (después de todas las rutas)
+app.use(notFoundHandler);
+app.use(errorHandler);
+
 /**
  * Inicializar servidor y RabbitMQ
  */
@@ -50,18 +56,18 @@ async function startServer() {
 
     // Iniciar servidor HTTP
     app.listen(PORT, () => {
-      console.log(`🔔 Notification Service running on port ${PORT}`);
-      console.log(`📡 SSE endpoint: http://localhost:${PORT}/notifications/stream`);
+      logger.info(`Notification Service running on port ${PORT}`);
+      logger.info(`SSE endpoint: http://localhost:${PORT}/notifications/stream`);
     });
   } catch (error) {
-    console.error('❌ Error al iniciar el servidor:', error);
+    logger.error('Error al iniciar el servidor', { error: error instanceof Error ? error.message : error });
     process.exit(1);
   }
 }
 
 // Graceful shutdown
 process.on('SIGINT', async () => {
-  console.log('\n⏹️  Cerrando servidor...');
+  logger.info('Cerrando servidor...');
   await rabbitMQConsumer.close();
   process.exit(0);
 });
